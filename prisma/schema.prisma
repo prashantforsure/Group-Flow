@@ -16,9 +16,14 @@ model User {
   id                    String               @id @default(cuid())
   email                 String               @unique
   name                  String?
-  password              String               // Hashed password
+  password              String?    
+  emailVerified     DateTime?   
+  image             String?      
+  verificationToken String?   @unique
+  resetToken        String?   @unique
+  resetTokenExpiry  DateTime?
   avatar                String?
-  role                  UserRole             @default(USER)
+  role              String    @default("USER")
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
   isVerified            Boolean              @default(false)
@@ -26,6 +31,8 @@ model User {
   twoFactorEnabled      Boolean              @default(false)
   workHoursPerWeek      Int?                 @default(40)
   timezone              String?
+  accounts          Account[]
+  sessions          Session[]
   ownedGroups          Group[]              @relation("GroupOwner")
   memberGroups         GroupMember[]
   createdTasks         Task[]               @relation("TaskCreator")
@@ -46,6 +53,33 @@ enum UserRole {
   USER
   CLIENT
 }
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
 model Group {
   id                    String               @id @default(cuid())
   name                  String
@@ -55,7 +89,7 @@ model Group {
   isArchived           Boolean              @default(false)
   visibility           GroupVisibility      @default(PRIVATE)
   maxMembers           Int                  @default(50)
-  settings             Json?                // Store group-specific settings
+  settings             Json?               
   owner                User                 @relation("GroupOwner", fields: [ownerId], references: [id])
   ownerId              String
   members              GroupMember[]
@@ -79,7 +113,7 @@ model GroupMember {
   userId               String
   role                 GroupRole            @default(MEMBER)
   joinedAt             DateTime             @default(now())
-  permissions          Json?                // Custom member permissions
+  permissions          Json?              
   
   @@unique([groupId, userId])
 }
