@@ -4,7 +4,7 @@ import { createGroupSchema } from "@/lib/validations/group";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
     try {
       const session = await getServerSession(authOptions);
       
@@ -13,7 +13,7 @@ export async function GET(request: Request) {
       }
   
       // Get query parameters for filtering and pagination
-      const { searchParams } = new URL(request.url);
+      const { searchParams } = new URL(req.url);
       const page = parseInt(searchParams.get('page') || '1');
       const limit = parseInt(searchParams.get('limit') || '10');
       const search = searchParams.get('search');
@@ -96,38 +96,50 @@ export async function GET(request: Request) {
       );
     }
   }
-
-  export async function POST(req: NextRequest){
-    try{
-        const session = await getServerSession(authOptions);
-    
-        if (!session?.user?.email) {
-          return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-        }
-        const body = await req.json();
-        const validatedData = createGroupSchema.parse(body)
-
-        const group = await prisma.group.create({
-            data: {
-              ...validatedData,
-              owner: {
+  
+  export async function POST(req: NextRequest) {
+    try {
+      const session = await getServerSession(authOptions);
+      
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+  
+      const body = await req.json();
+      const validatedData = createGroupSchema.parse(body);
+  
+      const group = await prisma.group.create({
+        data: {
+          ...validatedData,
+          owner: {
+            connect: {
+              email: session.user.email,
+            },
+          },
+          members: {
+            create: {
+              user: {
                 connect: {
                   email: session.user.email,
                 },
               },
-              members: {
-                create: {
-                  user: {
-                    connect: {
-                      email: session.user.email,
-                    },
-                  },
-                  role: 'ADMIN',
-                },
-              },
+              role: 'ADMIN',
             },
-            include: {
-              owner: {
+          },
+        },
+        include: {
+          owner: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+          members: {
+            select: {
+              role: true,
+              user: {
                 select: {
                   id: true,
                   name: true,
@@ -135,45 +147,35 @@ export async function GET(request: Request) {
                   image: true,
                 },
               },
-              members: {
-                select: {
-                  role: true,
-                  user: {
-                    select: {
-                      id: true,
-                      name: true,
-                      email: true,
-                      image: true,
-                    },
-                  },
-                },
-              },
             },
-          });
-          await prisma.channel.createMany({
-            data: [
-              {
-                name: 'General',
-                description: 'General discussion channel',
-                type: 'GENERAL',
-                groupId: group.id,
-              },
-              {
-                name: 'Announcements',
-                description: 'Important announcements channel',
-                type: 'ANNOUNCEMENTS',
-                groupId: group.id,
-              },
-            ],
-          });
+          },
+        },
+      });
+  
       
-          return NextResponse.json(group);
-    }catch(error){
-        console.error("Error creating group:", error);
-        if (error.name === 'ZodError') {
-          return NextResponse.json(
-            { error: "Invalid input", details: error.errors },
-            { status: 400 }
-          );
+      await prisma.channel.createMany({
+        data: [
+          {
+            name: 'General',
+            description: 'General discussion channel',
+            type: 'GENERAL',
+            groupId: group.id,
+          },
+          {
+            name: 'Announcements',
+            description: 'Important announcements channel',
+            type: 'ANNOUNCEMENTS',
+            groupId: group.id,
+          },
+        ],
+      });
+  
+      return NextResponse.json(group);
+    } catch (error) {
+      console.error("Error creating group:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
     }
   }
