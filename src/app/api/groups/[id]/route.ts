@@ -180,3 +180,69 @@ export async function PUT(req: NextRequest, { params } : { params: { id : string
           );
     }
 }
+
+
+export async function DELETE(
+    request: Request,
+    { params }: { params: { id: string } }
+  ) {
+    try {
+      const session = await getServerSession(authOptions);
+      
+      if (!session?.user?.email) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      const group = await prisma.group.findUnique({
+        where: { id: params.id },
+        select: { ownerId: true },
+      });
+  
+      if (!group) {
+        return NextResponse.json({ error: "Group not found" }, { status: 404 });
+      }
+  
+      if (group.ownerId !== session.user.id) {
+        return NextResponse.json(
+          { error: "Only group owners can delete groups" },
+          { status: 403 }
+        );
+      }
+      await prisma.$transaction([
+        prisma.taskAssignment.deleteMany({
+          where: {
+            task: {
+              groupId: params.id,
+            },
+          },
+        }),
+     
+        prisma.task.deleteMany({
+          where: { groupId: params.id },
+        }),
+       
+        prisma.channel.deleteMany({
+          where: { groupId: params.id },
+        }),
+       
+        prisma.groupMember.deleteMany({
+          where: { groupId: params.id },
+        }),
+        
+        prisma.group.delete({
+          where: { id: params.id },
+        }),
+      ]);
+  
+      return NextResponse.json(
+        { message: "Group deleted successfully" },
+        { status: 200 }
+      );
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
+  }
+
