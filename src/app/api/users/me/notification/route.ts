@@ -9,6 +9,8 @@ export async function GET(){
         if(!session?.user?.email){
             return NextResponse.json({
                 message: "session not found"
+            }, {
+                status: 401
             })
         }
         const notifications = await prisma.notification.findMany({
@@ -28,6 +30,22 @@ export async function GET(){
                 createdAt: true,
               },
         })
-        
+         if(!notifications){
+            return NextResponse.json({
+                message: "notification not found"
+            }, {
+                status: 404
+            })
+         } 
+         return NextResponse.json({
+            notifications
+         })
+    }
+    catch(error){
+        return NextResponse.json({
+            error: "internal error"
+        }, {
+            status: 500
+        })
     }
 }
