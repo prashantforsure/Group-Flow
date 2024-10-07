@@ -126,6 +126,55 @@ export async function POST(req: NextRequest, { params }: { params : { id : strin
 
     return NextResponse.json(member);
   }catch(error){
-    
+    console.error("Error adding member:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(req: NextRequest, { params } : { params : { userId : string, id: string }}){
+  try{
+    const session = await getServerSession(authOptions);
+    if(!session?.user?.email){
+      return NextResponse.json({
+          message: "unathenticated"
+      }, {
+          status: 401
+      })
+  }
+  const currentMember = await prisma.groupMember.findFirst({
+    where: {
+      groupId: params.id,
+      user: { email: session.user.email },
+      role: { in: ['ADMIN', 'MODERATOR'] },
+    }
+  })
+  if(!currentMember){
+    return NextResponse.json({
+      message : ' user does not have permission to remove'
+    }, {
+      status: 403
+    })
+  }
+  await prisma.groupMember.delete({
+    where: {
+      groupId_userId: {
+        groupId: params.id,
+        userId: params.userId,
+      },
+    },
+  })
+  return NextResponse.json(
+    { message: "Member removed successfully" },
+    { status: 200 }
+  );
+  }catch(error){
+    console.error("Error adding member:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
