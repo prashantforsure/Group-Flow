@@ -19,7 +19,6 @@ export async function GET(req: NextRequest) {
       const search = searchParams.get('search');
       const visibility = searchParams.get('visibility');
   
-      // Build where clause based on filters
       const whereClause: any = {
         OR: [
           { owner: { email: session.user.email } },

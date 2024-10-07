@@ -17,7 +17,6 @@ export async function POST(
       const body = await request.json();
       const validatedData = createInviteSchema.parse(body);
   
-      // Check if user has permission to send invites
       const currentMember = await prisma.groupMember.findFirst({
         where: {
           groupId: params.id,
@@ -58,7 +57,7 @@ export async function POST(
         },
       });
   
-      // TODO: Send email notification
+    
   
       return NextResponse.json(invite);
     } catch (error) {
