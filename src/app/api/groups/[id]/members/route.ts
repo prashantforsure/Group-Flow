@@ -1,9 +1,10 @@
 import { authOptions } from "@/lib/auth/config";
 import prisma from "@/lib/db";
+import { updateMemberRoleSchema } from "@/lib/validations/group";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params : { id : string }}){
+export async function GET(req: NextRequest, { params }: { params : { id : string } } ){
  try{
     const session = await getServerSession(authOptions);
     if(!session?.user?.email){
@@ -58,7 +59,7 @@ export async function GET(req: NextRequest, { params }: { params : { id : string
  }
 }
 
-export async function POST(req: NextRequest, { params }: { params : { id : string }}){
+export async function POST(req: NextRequest, { params }: { params : { id : string } } ){
   try{
     const session = await getServerSession(authOptions);
     if(!session?.user?.email){
@@ -134,7 +135,7 @@ export async function POST(req: NextRequest, { params }: { params : { id : strin
   }
 }
 
-export async function PUT(req: NextRequest, { params } : { params : { userId : string, id: string }}){
+export async function DELETE(req: NextRequest, { params } : { params : { userId : string, id: string } } ){
   try{
     const session = await getServerSession(authOptions);
     if(!session?.user?.email){
@@ -177,4 +178,58 @@ export async function PUT(req: NextRequest, { params } : { params : { userId : s
       { status: 500 }
     );
   }
+}
+
+export async function PUT(req: NextRequest, { params }: { params: { id: string; userId: string } } ){
+  try{
+    const session = await getServerSession(authOptions);
+    if(!session?.user?.email){
+      return NextResponse.json({
+        message: " unauthorized"
+      }, {
+        status: 401
+      })
+    }
+    const body = await req.json();
+    const validatedData =  updateMemberRoleSchema.parse(body);
+    const currentMember = await prisma.groupMember.findFirst({
+      where: {
+        groupId: params.id,
+        user: { email: session.user.email },
+        role: 'ADMIN'
+      }
+    })
+    if (!currentMember) {
+      return NextResponse.json(
+        { error: "Only admins can update member roles" },
+        { status: 403 }
+      );
+    }
+    const updatedMember = await prisma.groupMember.update({
+      where: {
+        groupId_userId: {
+          groupId: params.id,
+          userId: params.userId,
+        },
+      },
+      data: {
+        role: validatedData.role,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(updatedMember);
+  }catch(error){
+    
+  }
+
 }
