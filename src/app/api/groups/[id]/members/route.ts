@@ -229,7 +229,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string; 
 
     return NextResponse.json(updatedMember);
   }catch(error){
-    
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 
 }
