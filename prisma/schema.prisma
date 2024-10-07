@@ -31,6 +31,8 @@ model User {
   twoFactorEnabled      Boolean              @default(false)
   workHoursPerWeek      Int?                 @default(40)
   timezone              String?
+  sentInvitations GroupInvitation[]
+  
   accounts          Account[]
   sessions          Session[]
   ownedGroups          Group[]              @relation("GroupOwner")
@@ -92,6 +94,7 @@ model Group {
   settings             Json?               
   owner                User                 @relation("GroupOwner", fields: [ownerId], references: [id])
   ownerId              String
+  invitations GroupInvitation[]
   members              GroupMember[]
   tasks                Task[]
   channels             Channel[]
@@ -371,4 +374,24 @@ enum AchievementType {
   DEADLINE_CHAMPION
   QUALITY_GURU
   PRODUCTIVITY_STAR
+}
+model GroupInvitation {
+  id                    String               @id @default(cuid())
+  email                 String
+  role                  GroupRole            @default(MEMBER)
+  status                InviteStatus         @default(PENDING)
+  message               String?
+  group                 Group                @relation(fields: [groupId], references: [id])
+  groupId               String
+  inviter               User                 @relation(fields: [inviterId], references: [id])
+  inviterId             String
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+  EXPIRED
 }
