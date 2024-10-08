@@ -149,3 +149,43 @@ if(!task){
      { status: 500 });
 }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const task = await prisma.task.findUnique({
+      where: { id: params.id },
+      include: { group: true }
+    });
+
+    if (!task) {
+      return NextResponse.json({ error: 'Task not found' }, { status: 404 });
+    }
+    const groupMember = await prisma.groupMember.findFirst({
+      where: {
+        groupId: task.groupId,
+        userId: session.user.id,
+      }
+    });
+
+    if (!groupMember || (groupMember.role !== 'ADMIN' && task.creatorId !== session.user.id)) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 });
+    }
+
+    await prisma.task.delete({
+      where: { id: params.id }
+    });
+
+    return NextResponse.json({ message: 'Task deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting task:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
