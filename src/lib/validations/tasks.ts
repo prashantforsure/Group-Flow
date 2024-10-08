@@ -10,3 +10,8 @@ export const TaskCreateSchema = z.object({
     estimatedHours: z.number().optional(),
     tags: z.array(z.string()).optional(),
   });
+
+  export const AssignTaskSchema = z.object({
+    assigneeId: z.string(),
+    role: z.enum(['RESPONSIBLE', 'ACCOUNTABLE', 'CONSULTED', 'INFORMED']).default('RESPONSIBLE'),
+  });
