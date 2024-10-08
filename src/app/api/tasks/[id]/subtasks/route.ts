@@ -61,6 +61,7 @@ try{
       });
     return NextResponse.json(subtask)
 }catch(error){
-    
+    console.error('Error creating subtask:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 }
 }
