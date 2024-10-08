@@ -15,3 +15,7 @@ export const TaskCreateSchema = z.object({
     assigneeId: z.string(),
     role: z.enum(['RESPONSIBLE', 'ACCOUNTABLE', 'CONSULTED', 'INFORMED']).default('RESPONSIBLE'),
   });
+
+  export const StatusUpdateSchema = z.object({
+    status: z.enum(['PENDING', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELLED'])
+  });
