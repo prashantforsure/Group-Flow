@@ -19,3 +19,10 @@ export const TaskCreateSchema = z.object({
   export const StatusUpdateSchema = z.object({
     status: z.enum(['PENDING', 'IN_PROGRESS', 'IN_REVIEW', 'COMPLETED', 'ON_HOLD', 'CANCELLED'])
   });
+  export const SubtaskCreateSchema = z.object({
+    title: z.string().min(1).max(255),
+    description: z.string().optional(),
+    priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).default('MEDIUM'),
+    dueDate: z.string().datetime().optional(),
+    assigneeIds: z.array(z.string()).optional(),
+  });
