@@ -97,9 +97,12 @@ export async function GET(req: Request) {
           receiverId: validatedData.receiverId,
           attachments: validatedData.attachments
             ? {
-                createMany: {
-                  data: validatedData.attachments
-                }
+                create: validatedData.attachments.map(attachment => ({
+                  filename: attachment.filename,
+                  fileType: attachment.fileType,
+                  fileSize: attachment.fileSize,
+                  url: attachment.url
+                }))
               }
             : undefined
         },
@@ -112,8 +115,7 @@ export async function GET(req: Request) {
           },
           attachments: true
         }
-      })
-  
+      });
       
       await prisma.notification.create({
         data: {
