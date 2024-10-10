@@ -135,7 +135,7 @@ export async function POST(req: NextRequest, { params }: { params : { id : strin
   }
 }
 
-export async function DELETE(req: NextRequest, { params } : { params : { userId : string, id: string } } ){
+export async function DELETE( { params } : { params : { userId : string, id: string } } ){
   try{
     const session = await getServerSession(authOptions);
     if(!session?.user?.email){

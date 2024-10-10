@@ -5,12 +5,12 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import axios from 'axios'
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { toast } from '@/hooks/use-toast'
-import { Users, FileText, MessageSquare, Settings } from 'lucide-react'
+import { FileText, Settings } from 'lucide-react'
 
 type Group = {
   id: string

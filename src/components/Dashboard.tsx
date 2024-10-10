@@ -5,7 +5,6 @@ import axios from 'axios'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Bell, CheckCircle, Clock, PlusCircle, Users, FileText, Calendar } from 'lucide-react'
 
 type Task = {
