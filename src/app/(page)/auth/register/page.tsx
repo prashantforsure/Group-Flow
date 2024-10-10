@@ -4,42 +4,14 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+
 import { Icons } from "@/components/ui/icons"
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export default function Page() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+ 
   const router = useRouter()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      })
-      
-      if (response.ok) {
-        // Registration successful, redirect to sign in page
-        router.push('/auth/signin')
-      } else {
-        // Handle registration error
-        const error = await response.text()
-        console.error('Registration failed:', error)
-        // You might want to show an error message to the user here
-      }
-    } catch (error) {
-      console.error('Registration error:', error)
-      // You might want to show an error message to the user here
-    }
-  }
 
   return (
     <div className="flex min-h-screen items-center justify-center ">

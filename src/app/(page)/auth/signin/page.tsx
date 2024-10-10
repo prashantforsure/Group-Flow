@@ -5,16 +5,13 @@ import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+
 import { Icons } from "@/components/ui/icons"
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export default function Page() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
