@@ -16,9 +16,6 @@ type ToasterToast = ToastProps & {
   action?: ToastActionElement
 }
 
-// Use union type directly for action types
-type ActionType = "ADD_TOAST" | "UPDATE_TOAST" | "DISMISS_TOAST" | "REMOVE_TOAST";
-
 let count = 0
 
 function genId() {

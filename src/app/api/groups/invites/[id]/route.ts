@@ -66,7 +66,7 @@ export async function PUT(
   
       return NextResponse.json(updatedInvitation);
     } catch (error) {
-      
+      console.log(error)
       return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
