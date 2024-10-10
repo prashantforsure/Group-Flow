@@ -22,7 +22,14 @@ const Navbar = async () => {
         <div className='flex items-center gap-4'>
           {session?.user ? (
             <>
-              
+              <Link href='/dashboard' className='px-6'>
+                <Button 
+                  variant="default" 
+                  className='rounded-lg px-6 transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-0.5 hover:bg-primary/90'
+                >
+                  Dashboard
+                </Button>
+              </Link>
               <UserAccountNav user={{
                      ...session.user,
                      image: session.user.image ?? "", // Fallback to an empty string if image is undefined or null
@@ -32,6 +39,7 @@ const Navbar = async () => {
  />
             </>
           ) : (
+            
             <Link href='/auth/signin'>
               <Button 
                 variant="default" 
@@ -40,7 +48,9 @@ const Navbar = async () => {
                 Sign In
               </Button>
             </Link>
-          )}
+          )
+          }
+          
         </div>
       </div>
     </div>
