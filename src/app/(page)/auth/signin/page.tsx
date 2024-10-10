@@ -1,7 +1,7 @@
 
 'use client'
 
-import { useState } from 'react'
+
 import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
@@ -14,30 +14,7 @@ export default function Page() {
   
   const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password }),
-      })
-      
-      if (response.ok) {
-        // Registration successful, redirect to sign in page
-        router.push('/auth/signin')
-      } else {
-        // Handle registration error
-        const error = await response.text()
-        console.error('Registration failed:', error)
-        // You might want to show an error message to the user here
-      }
-    } catch (error) {
-      console.error('Registration error:', error)
-      // You might want to show an error message to the user here
-    }
-  }
+  
 
   return (
     <div className="flex min-h-screen items-center justify-center ">
@@ -65,7 +42,7 @@ export default function Page() {
             </Button>
           </div>
           <p className='px-8 text-center text-sm text-muted-foreground pt-2'>
-    Don't have an account?{' '}
+    Don't have an account?
     <Link
       href='/auth/register'
       className='hover:text-brand text-sm underline underline-offset-4'>

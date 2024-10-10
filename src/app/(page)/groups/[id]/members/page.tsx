@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { toast } from '@/hooks/use-toast'
-import { Search, UserPlus } from 'lucide-react'
+import { UserPlus } from 'lucide-react'
 import { Badge } from "@/components/ui/badge"
 type Member = {
   id: string

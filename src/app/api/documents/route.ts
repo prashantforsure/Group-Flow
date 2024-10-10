@@ -18,7 +18,7 @@ export async function GET(req: Request) {
       const limit = parseInt(searchParams.get('limit') || '10')
       const skip = (page - 1) * limit
   
-      const filters: any = {
+      const filters = {
         group: {
           members: {
             some: {
