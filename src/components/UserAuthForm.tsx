@@ -25,16 +25,17 @@ export default function Register() {
       })
       
       if (response.ok) {
-        
+        // Registration successful, redirect to sign in page
         router.push('/auth/signin')
       } else {
-        
+        // Handle registration error
         const error = await response.text()
         console.error('Registration failed:', error)
+        // You might want to show an error message to the user here
       }
     } catch (error) {
       console.error('Registration error:', error)
-    
+      // You might want to show an error message to the user here
     }
   }
 
@@ -44,55 +45,7 @@ export default function Register() {
         <div className="text-center">
           <h2 className="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4 rounded-md shadow-sm">
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">Email address</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="new-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mt-1"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Button type="submit" className="w-full">
-              Register
-            </Button>
-          </div>
-        </form>
+       
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
