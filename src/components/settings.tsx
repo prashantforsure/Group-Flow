@@ -32,7 +32,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<SettingsFormData | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const { register, handleSubmit, formState: { errors }, watch } = useForm<SettingsFormData>({
+  const { register, handleSubmit, formState: { errors } } = useForm<SettingsFormData>({
     resolver: zodResolver(settingsSchema),
     defaultValues: settings || {},
   })

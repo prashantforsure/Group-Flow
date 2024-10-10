@@ -57,7 +57,7 @@ export default function GroupSettingsPage() {
     }
   }
 
-  const handleSettingsChange = (field: string, value: any) => {
+  const handleSettingsChange = (field: string, value: unknown) => {
     setSettings(prev => prev ? { ...prev, [field]: value } : null)
   }
 
