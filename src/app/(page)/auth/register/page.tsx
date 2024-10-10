@@ -11,7 +11,7 @@ import Link from 'next/link'
 
 export default function Page() {
  
-  const router = useRouter()
+ 
 
   return (
     <div className="flex min-h-screen items-center justify-center ">
@@ -39,7 +39,7 @@ export default function Page() {
             </Button>
           </div>
           <p className='px-8 text-center text-sm text-muted-foreground'>
-    Already a user?{' '}
+    Already a user?
     <Link
       href='/auth/signin'
       className='hover:text-brand text-sm underline underline-offset-4'>

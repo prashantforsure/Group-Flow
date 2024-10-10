@@ -29,12 +29,12 @@ export async function GET(req: Request) {
       }
   
       if (groupId) {
-        //@ts-ignore
+        //@ts-expect-error
         filters.groupId = groupId
       }
   
       if (search) {
-        //@ts-ignore
+        //@ts-expect-error
         filters.OR = [
           { title: { contains: search, mode: 'insensitive' } },
           { content: { contains: search, mode: 'insensitive' } }

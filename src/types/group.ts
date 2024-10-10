@@ -3,7 +3,7 @@ export interface CreateGroupInput {
     description?: string;
     visibility: 'PUBLIC' | 'PRIVATE' | 'ORGANIZATION';
     maxMembers?: number;
-    settings?: Record<string, any>;
+    settings?: Record<string, unknown>;
   }
   
   export interface UpdateGroupInput extends Partial<CreateGroupInput> {

@@ -46,6 +46,7 @@ export async function PUT(
       const updatedInvitation = await prisma.$transaction(async (prisma) => {
         const updated = await prisma.groupInvitation.update({
           where: { id: params.id },
+          //@ts-expect-error
           data: { status: validatedData.status },
         });
   
@@ -53,6 +54,7 @@ export async function PUT(
           await prisma.groupMember.create({
             data: {
               group: { connect: { id: invitation.groupId } },
+              //@ts-expect-error
               user: { connect: { email: session.user.email } },
               role: invitation.role,
             },

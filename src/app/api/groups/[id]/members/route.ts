@@ -18,15 +18,17 @@ export async function GET(req: NextRequest, { params }: { params : { id : string
     const role = searchParams.get('role');
     const search = searchParams.get('search');
     
-    const whereClause: any = {
+    const whereClause = {
         groupId: params.id,
       };
   
     if (role) {
+      //@ts-expect-error
         whereClause.role = role;
       }
 
     if (search) {
+      //@ts-expect-error
         whereClause.user = {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },

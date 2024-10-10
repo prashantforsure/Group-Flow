@@ -3,19 +3,13 @@
 
 
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-
 import { Icons } from "@/components/ui/icons"
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 
 export default function Page() {
   
-  const router = useRouter()
-
-  
-
   return (
     <div className="flex min-h-screen items-center justify-center ">
       <motion.div 

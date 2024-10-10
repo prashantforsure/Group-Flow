@@ -1,9 +1,8 @@
 
-import { BookOpenText, HomeIcon } from 'lucide-react'
 import { getServerSession } from 'next-auth'
 import Link from 'next/link'
 import React from 'react'
-import { Button, buttonVariants } from './ui/button'
+import { Button } from './ui/button'
 
 import { authOptions } from '@/lib/auth/config'
 import { UserAccountNav } from './UserAccountNav'

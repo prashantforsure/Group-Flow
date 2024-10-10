@@ -128,7 +128,7 @@ export default function GroupsListPage() {
 
       <div className="mt-6">
         <Pagination
-        //@ts-ignore
+        
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}

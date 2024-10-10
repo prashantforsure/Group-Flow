@@ -2,7 +2,8 @@ import { PrismaClient } from '@prisma/client'
 import "server-only"
 
 declare global {
-  let cachedPrisma: PrismaClient | undefined
+  //@ts-ignore
+  var cachedPrisma: PrismaClient | undefined
 }
 
 let prisma: PrismaClient
