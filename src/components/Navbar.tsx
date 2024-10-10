@@ -33,8 +33,8 @@ const Navbar = async () => {
               <UserAccountNav user={{
                      ...session.user,
                      image: session.user.image ?? "", // Fallback to an empty string if image is undefined or null
-                     name: session.user.name ?? "",   // Fallback to an empty string if name is undefined or null
-                     email: session.user.email ?? ""  // Fallback to an empty string if email is undefined or null
+                     name: session.user.name ?? "",   
+                     email: session.user.email ?? ""  
 }}
  />
             </>
