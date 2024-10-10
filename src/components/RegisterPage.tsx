@@ -7,25 +7,34 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Icons } from "@/components/ui/icons"
-import Link from 'next/link'
 
-export default function SignIn() {
+export default function Register() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const result = await signIn('credentials', {
-      redirect: false,
-      email,
-      password,
-    })
-    if (result?.error) {
-      // Handle error
-      console.error(result.error)
-    } else {
-      router.push('/dashboard') 
+    
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password }),
+      })
+      
+      if (response.ok) {
+        
+        router.push('/auth/signin')
+      } else {
+        
+        const error = await response.text()
+        console.error('Registration failed:', error)
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+    
     }
   }
 
@@ -33,10 +42,23 @@ export default function SignIn() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
       <div className="w-full max-w-md space-y-8 rounded-xl bg-white p-10 shadow-md">
         <div className="text-center">
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">Sign in to your account</h2>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">Create your account</h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4 rounded-md shadow-sm">
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="mt-1"
+              />
+            </div>
             <div>
               <Label htmlFor="email">Email address</Label>
               <Input
@@ -56,7 +78,7 @@ export default function SignIn() {
                 id="password"
                 name="password"
                 type="password"
-                autoComplete="current-password"
+                autoComplete="new-password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -67,7 +89,7 @@ export default function SignIn() {
 
           <div>
             <Button type="submit" className="w-full">
-              Sign in
+              Register
             </Button>
           </div>
         </form>
@@ -87,9 +109,8 @@ export default function SignIn() {
               className="w-full"
             >
               <Icons.google className="mr-2 h-4 w-4" />
-              Sign in with Google
+              Sign up with Google
             </Button>
-            <span className="bg-white px-2 relative flex justify-center text-sm pt-2">or {" "} <Link href="/auth/register" className='underline'> Register</Link></span>
           </div>
         </div>
       </div>

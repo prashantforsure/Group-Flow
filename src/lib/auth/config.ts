@@ -10,12 +10,13 @@ interface User extends DefaultUser {
   isVerified?: boolean;
 }
 
+
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       profile(profile) {
         return {
           id: profile.sub,
@@ -24,50 +25,15 @@ export const authOptions: AuthOptions = {
           image: profile.picture,
           role: "USER",
           isVerified: true,
-        }
+        };
       },
     }),
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      authorize: (async (credentials: Record<"email" | "password", string> | undefined) => {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email }
-        });
-
-        if (!user || !user.password) {
-          return null;
-        }
-
-        const isValidPassword = await bcrypt.compare(credentials.password, user.password);
-
-        if (!isValidPassword) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          isVerified: user.isVerified,
-          image: user.image,
-        };
-      }) as any, 
-    })
   ],
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === "google") {
         const existingUser = await prisma.user.findUnique({
-          where: { email: user.email! }
+          where: { email: user.email! },
         });
 
         if (!existingUser) {
@@ -78,8 +44,7 @@ export const authOptions: AuthOptions = {
               image: user.image ?? null,
               role: "USER",
               isVerified: true,
-              password: await bcrypt.hash(Math.random().toString(36).slice(-8), 10),
-            }
+            },
           });
         }
       }
@@ -87,9 +52,9 @@ export const authOptions: AuthOptions = {
     },
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as User).role;
+        token.role = user.role;
         token.id = user.id;
-        token.isVerified = (user as User).isVerified;
+        token.isVerified = user.isVerified;
       }
       return token;
     },
@@ -100,7 +65,7 @@ export const authOptions: AuthOptions = {
         session.user.isVerified = token.isVerified as boolean;
       }
       return session;
-    }
+    },
   },
   pages: {
     signIn: "/auth/signin",
@@ -109,6 +74,6 @@ export const authOptions: AuthOptions = {
   session: {
     strategy: "jwt",
   },
-  secret: process.env.NEXTAUTH_SECRET ?? "",
+  secret: process.env.NEXTAUTH_SECRET!,
 };
 

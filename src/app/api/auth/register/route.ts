@@ -29,9 +29,9 @@ export async function POST(req: NextRequest){
                 verificationToken,
             }
         })
-        return NextResponse.json({
-            message: 'user had been created'
-        })
+        return NextResponse.json(createUser
+            
+        )
     }catch(error){
         console.log(error);
         return NextResponse.json({
