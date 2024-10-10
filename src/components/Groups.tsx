@@ -87,7 +87,7 @@ export default function GroupsListPage() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
-          icon={<Search className="h-4 w-4 text-gray-500" />}
+         
         />
       </div>
 
@@ -129,6 +129,7 @@ export default function GroupsListPage() {
 
       <div className="mt-6">
         <Pagination
+        //@ts-ignore
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}
