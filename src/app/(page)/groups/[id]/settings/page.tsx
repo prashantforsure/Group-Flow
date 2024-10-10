@@ -124,7 +124,7 @@ export default function GroupSettingsPage() {
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>General Settings</CardTitle>
-            <CardDescription>Manage your group's basic information</CardDescription>
+            <CardDescription>Manage your groups basic information</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>

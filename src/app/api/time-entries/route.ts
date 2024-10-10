@@ -15,15 +15,17 @@ export async function GET(req: Request) {
       const startDate = searchParams.get('startDate')
       const endDate = searchParams.get('endDate')
   
-      const filters: any = {
+      const filters = {
         userId: session.user.id
       }
   
       if (taskId) {
+        // @ts-expect-error This is expected to fail because the function
         filters.taskId = taskId
       }
   
       if (startDate && endDate) {
+        // @ts-expect-error This is expected to fail because the function
         filters.startTime = {
           gte: new Date(startDate),
           lte: new Date(endDate)

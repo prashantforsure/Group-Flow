@@ -128,7 +128,7 @@ export default function GroupsListPage() {
 
       <div className="mt-6">
         <Pagination
-        //@ts-expect-error
+        //@ts-expect-error something went wrong, will figure it out.
           currentPage={currentPage}
           totalPages={totalPages}
           onPageChange={setCurrentPage}

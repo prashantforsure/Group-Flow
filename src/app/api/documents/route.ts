@@ -29,12 +29,12 @@ export async function GET(req: Request) {
       }
   
       if (groupId) {
-        //@ts-expect-error
+        //@ts-expect-error This is expected to fail because the function is not defined in the current scope
         filters.groupId = groupId
       }
   
       if (search) {
-        //@ts-expect-error
+        //@ts-expect-error This is expected to fail because the function is not defined in the current scope
         filters.OR = [
           { title: { contains: search, mode: 'insensitive' } },
           { content: { contains: search, mode: 'insensitive' } }

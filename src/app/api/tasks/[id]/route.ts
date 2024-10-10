@@ -77,6 +77,7 @@ try{
       }
      return NextResponse.json(task)
 }catch(error){
+  console.log(error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 }
 }
@@ -145,6 +146,7 @@ if(!task){
   });
   return NextResponse.json(updatedTask)
 }catch(error){
+  console.log(error)
   return NextResponse.json({ error: 'Internal server error' },
      { status: 500 });
 }

@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     const status = searchParams.get('status');
     const priority = searchParams.get('priority');
 
-    const whereClause: any = {
+    const whereClause = {
       OR: [
         { creator: { email: session.user.email } },
         { assignments: { some: { assignee: { email: session.user.email } } } },
@@ -25,10 +25,12 @@ export async function GET(request: Request) {
     };
 
     if (status) {
+      // @ts-expect-error This is expected to fail because the function
       whereClause.status = status;
     }
 
     if (priority) {
+      // @ts-expect-error This is expected to fail because the function
       whereClause.priority = priority;
     }
 

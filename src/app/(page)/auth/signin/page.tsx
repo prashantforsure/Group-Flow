@@ -36,7 +36,7 @@ export default function Page() {
             </Button>
           </div>
           <p className='px-8 text-center text-sm text-muted-foreground pt-2'>
-    Don't have an account?
+          Don&apos;t have an account?
     <Link
       href='/auth/register'
       className='hover:text-brand text-sm underline underline-offset-4'>

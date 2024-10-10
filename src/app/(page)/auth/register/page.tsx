@@ -1,10 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
-
 import { Icons } from "@/components/ui/icons"
 import { motion } from 'framer-motion'
 import Link from 'next/link'

@@ -39,6 +39,7 @@ export async function GET({ params }: { params: { id: string } }){
             status:200
         })
     }catch(error){
+        console.log(error)
         return NextResponse.json({
             error: "internal error"
         }, {

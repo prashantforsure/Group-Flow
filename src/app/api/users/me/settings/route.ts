@@ -36,6 +36,7 @@ export async function PUT(req: NextRequest){
             status: 200
         })
     }catch(error){
+        console.log(error)
         return NextResponse.json({
             error: "internal error"
         }, {

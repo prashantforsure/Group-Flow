@@ -54,6 +54,7 @@ export async function GET(){
         })
         return NextResponse.json({groups})
     }catch(error){
+      console.log(error)
         return NextResponse.json({
             error: 'internal server error'
         })

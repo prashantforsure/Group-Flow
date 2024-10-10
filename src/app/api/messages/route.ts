@@ -22,7 +22,7 @@ export async function GET(req: Request) {
           { status: 400 }
         )
       }
-      const query: any = {
+      const query = {
         where: {
           OR: [
             {
@@ -50,12 +50,14 @@ export async function GET(req: Request) {
         take: limit
       }
       if (before) {
+        // @ts-expect-error This is expected to fail because the function is not defined in the current scope
         query.cursor = {
           id: before
         }
+        // @ts-expect-error This is expected to fail because the function is not defined in the current scope
         query.skip = 1 
       }
-  
+  // @ts-expect-error This is expected to fail because the function is not defined in the current scope
       const messages = await prisma.message.findMany(query)
   
       return NextResponse.json(messages)

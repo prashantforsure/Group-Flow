@@ -57,6 +57,7 @@ try{
       });
       return NextResponse.json(assignment);
 }catch(error){
+  console.log(error)
     return NextResponse.json({ error: 'Internal server error' },
         { status: 500 });
 }

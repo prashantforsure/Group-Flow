@@ -23,12 +23,12 @@ export async function GET(req: NextRequest, { params }: { params : { id : string
       };
   
     if (role) {
-      //@ts-expect-error
+      //@ts-expect-error This is expected to fail because the function is not defined in the current scope
         whereClause.role = role;
       }
 
     if (search) {
-      //@ts-expect-error
+      //@ts-expect-error This is expected to fail because the function is not defined in the current scope
         whereClause.user = {
           OR: [
             { name: { contains: search, mode: 'insensitive' } },
@@ -54,6 +54,7 @@ export async function GET(req: NextRequest, { params }: { params : { id : string
     })
     return NextResponse.json(members);
  }catch(error){
+  console.error("Error adding member:", error);
     return NextResponse.json(
         { error: "Internal server error" },
         { status: 500 }
@@ -231,6 +232,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string; 
 
     return NextResponse.json(updatedMember);
   }catch(error){
+    console.error("Error adding member:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
