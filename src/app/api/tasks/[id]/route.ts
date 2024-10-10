@@ -4,7 +4,7 @@ import { TaskUpdateSchema } from "@/lib/validations/taskUpdate";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params : { id: string } } ){
+export async function GET({ params }: { params : { id: string } } ){
 try{
     const session = await getServerSession(authOptions)
     if(!session?.user?.email){
@@ -143,7 +143,7 @@ if(!task){
       group: true,
     }
   });
-  return NextResponse.json(task)
+  return NextResponse.json(updatedTask)
 }catch(error){
   return NextResponse.json({ error: 'Internal server error' },
      { status: 500 });
@@ -151,7 +151,7 @@ if(!task){
 }
 
 export async function DELETE(
-  req: NextRequest,
+  
   { params }: { params: { id: string } }
 ) {
   try {

@@ -17,7 +17,7 @@ export async function GET(req: Request) {
       const page = parseInt(searchParams.get('page') || '1')
       const limit = parseInt(searchParams.get('limit') || '10')
       const skip = (page - 1) * limit
-  
+      
       const filters = {
         group: {
           members: {
@@ -29,10 +29,12 @@ export async function GET(req: Request) {
       }
   
       if (groupId) {
+        //@ts-ignore
         filters.groupId = groupId
       }
   
       if (search) {
+        //@ts-ignore
         filters.OR = [
           { title: { contains: search, mode: 'insensitive' } },
           { content: { contains: search, mode: 'insensitive' } }
