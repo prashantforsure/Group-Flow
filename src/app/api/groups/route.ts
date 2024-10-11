@@ -106,9 +106,10 @@ export async function GET(req: NextRequest) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
   
-      const body = await req.json();
-      const { name , description } = createGroupSchema.parse(body);
-  
+      const { name , description } = await req.json();
+      if (!name || !description) {
+        return NextResponse.json({ error: "Name and description are required" }, { status: 400 });
+      }
       const group = await prisma.group.create({
         data: {
           name,
