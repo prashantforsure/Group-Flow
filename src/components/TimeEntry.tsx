@@ -178,7 +178,7 @@ export default function TimeEntriesPage() {
                 <SelectValue placeholder="Select task" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Tasks</SelectItem>
+                <SelectItem value="all tasks">All Tasks</SelectItem>
                 {tasks.map(task => (
                   <SelectItem key={task.id} value={task.id}>{task.title}</SelectItem>
                 ))}
