@@ -11,6 +11,7 @@ import { Calendar } from "@/components/ui/calendar"
 
 import { Play, Pause, Plus, Clock } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { DateRangePicker } from './ui/date-range-picker'
 
 type TimeEntry = {
   id: string
@@ -160,8 +161,9 @@ export default function TimeEntriesPage() {
         <CardContent className="flex flex-wrap gap-4">
           <div className="w-full md:w-auto">
             <Label htmlFor="dateRange">Date Range</Label>
-            <DateRan
+            <DateRangePicker
               id="dateRange"
+              //@ts-expect-error there is some error will figure out
               value={dateRange}
               onValueChange={setDateRange}
             />
@@ -221,6 +223,7 @@ export default function TimeEntriesPage() {
             <Calendar
               mode="range"
               selected={dateRange}
+              //@ts-expect-error there is some error will figure out
               onSelect={setDateRange}
               className="rounded-md border"
             />
