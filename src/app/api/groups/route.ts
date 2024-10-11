@@ -107,11 +107,12 @@ export async function GET(req: NextRequest) {
       }
   
       const body = await req.json();
-      const validatedData = createGroupSchema.parse(body);
+      const { name , description } = createGroupSchema.parse(body);
   
       const group = await prisma.group.create({
         data: {
-          ...validatedData,
+          name,
+          description,
           owner: {
             connect: {
               email: session.user.email,

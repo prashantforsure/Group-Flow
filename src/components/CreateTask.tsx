@@ -8,14 +8,11 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
 import { Label } from "@/components/ui/label"
-
 import { MultiSelect } from "@/components/ui/multi-select"
-
+import { DatePicker } from "@/components/ui/date-picker"
 import { Loader2, Plus, X } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
-import { DatePicker } from './ui/date-picker'
 
 type User = {
   id: string
@@ -26,29 +23,39 @@ type Group = {
   id: string
   name: string
 }
+type Option = {
+  value: string
+  label: string
+}
+
 
 interface Task {
-    attachments?: File[];
-    subtasks?: { title: string; completed: boolean; }[];
-    dueDate?: Date;
-    [key: string]: any; 
-  }
-  
+  title: string
+  description: string
+  status: string
+  priority: string
+  dueDate: Date
+  assignedMembers: string[]
+  group: string
+  subtasks: { title: string; completed: boolean }[]
+  attachments: File[]
+}
+
 export default function CreateTaskPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [users, setUsers] = useState<User[]>([])
   const [groups, setGroups] = useState<Group[]>([])
-  const [task, setTask] = useState({
+  const [task, setTask] = useState<Task>({
     title: '',
     description: '',
     status: 'pending',
     priority: 'medium',
     dueDate: new Date(),
-    assignedMembers: [] as string[],
+    assignedMembers: [],
     group: '',
-    subtasks: [] as { title: string, completed: boolean }[],
-    attachments: [] as File[]
+    subtasks: [],
+    attachments: []
   })
 
   useEffect(() => {
@@ -58,8 +65,8 @@ export default function CreateTaskPage() {
   const fetchUsersAndGroups = async () => {
     try {
       const [usersRes, groupsRes] = await Promise.all([
-        axios.get('/api/users'),
-        axios.get('/api/groups')
+        axios.get<User[]>('/api/users'),
+        axios.get<Group[]>('/api/groups')
       ])
       setUsers(usersRes.data)
       setGroups(groupsRes.data)
@@ -71,6 +78,31 @@ export default function CreateTaskPage() {
         variant: "destructive",
       })
     }
+  }
+
+  const getSelectedOptions = (): Option[] => {
+    return task.assignedMembers.map(memberId => {
+      const user = users.find(u => u.id === memberId)
+      return {
+        value: memberId,
+        label: user?.name || memberId
+      }
+    })
+  }
+
+  // Convert users to Option[] format
+  const getUserOptions = (): Option[] => {
+    return users.map(user => ({
+      value: user.id,
+      label: user.name
+    }))
+  }
+
+  const handleMemberChange = (selectedOptions: Option[]) => {
+    setTask({
+      ...task,
+      assignedMembers: selectedOptions.map(option => option.value)
+    })
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -87,9 +119,7 @@ export default function CreateTaskPage() {
     }
   }
 
-  const handleMemberChange = (selectedMembers: string[]) => {
-    setTask({ ...task, assignedMembers: selectedMembers })
-  }
+  
 
   const handleAddSubtask = () => {
     setTask({
@@ -125,20 +155,19 @@ export default function CreateTaskPage() {
     setLoading(true)
 
     try {
-        const formData = new FormData();
-  
-        Object.entries(task as Task).forEach(([key, value]) => {
-          if (key === 'attachments' && Array.isArray(value)) {
-            (value as File[]).forEach((file: File) => formData.append('attachments', file));
-          } else if (key === 'subtasks' && Array.isArray(value)) {
-            formData.append('subtasks', JSON.stringify(value));
-          } else if (key === 'dueDate' && value instanceof Date) {
-            formData.append(key, value.toISOString());
-          } else if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean'){
-            formData.append(key, value.toString());
-          }
-        });
-        
+      const formData = new FormData()
+
+      Object.entries(task).forEach(([key, value]) => {
+        if (key === 'attachments') {
+          value.forEach((file: File) => formData.append('attachments', file))
+        } else if (key === 'subtasks') {
+          formData.append('subtasks', JSON.stringify(value))
+        } else if (key === 'dueDate') {
+          formData.append(key, value.toISOString())
+        } else {
+          formData.append(key, value.toString())
+        }
+      })
 
       await axios.post('/api/tasks', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -235,10 +264,8 @@ export default function CreateTaskPage() {
             <div>
               <Label htmlFor="assignedMembers">Assigned Members</Label>
               <MultiSelect
-                options={users.map(user => ({ value: user.id, label: user.name }))}
-                //@ts-expect-error there is some type error
-                selected={task.assignedMembers}
-                //@ts-expect-error there is some type error
+                options={getUserOptions()}
+                selected={getSelectedOptions()}
                 onChange={handleMemberChange}
                 placeholder="Select members"
               />

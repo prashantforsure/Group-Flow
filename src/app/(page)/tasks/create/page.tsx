@@ -1,10 +1,10 @@
-import DocumentsListPage from '@/components/Documents'
+import CreateTaskPage from '@/components/CreateTask'
 import React from 'react'
 
 const page = () => {
   return (
     <>
-    <DocumentsListPage />
+    <CreateTaskPage />
     </>
   )
 }

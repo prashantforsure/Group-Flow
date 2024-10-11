@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Bell, CheckCircle, Clock, PlusCircle, Users, FileText, Calendar } from 'lucide-react'
+import Link from 'next/link'
 
 type Task = {
   id: string
@@ -240,18 +241,24 @@ export default function Dashboard() {
       </Card>
 
       <div className="mt-6 flex space-x-4">
+        <Link href='/tasks/create'>
         <Button>
           <PlusCircle className="mr-2 h-4 w-4" />
           Create New Task
         </Button>
+        </Link>
+        
         <Button variant="outline">
           <Clock className="mr-2 h-4 w-4" />
           Start Time Entry
         </Button>
+        <Link href='/groups'>
         <Button variant="outline">
           <FileText className="mr-2 h-4 w-4" />
-          Create Document
+          Create Group
         </Button>
+        </Link>
+        
       </div>
     </div>
   )

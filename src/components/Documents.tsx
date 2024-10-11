@@ -168,7 +168,7 @@ export default function DocumentsListPage() {
                 <SelectValue placeholder="Filter by group" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Groups</SelectItem>
+                <SelectItem value="All groups">All Groups</SelectItem>
                 {groups.map(group => (
                   <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
                 ))}
