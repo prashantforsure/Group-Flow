@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,53 +22,61 @@ type Group = {
 
 export default function GroupsListPage() {
 
-  const [groups, setGroups] = useState<Group[]>([])
-  const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  
-  useEffect(() => {
-    fetchGroups()
-  }, [currentPage, searchTerm])
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
-  const fetchGroups = async () => {
+  const fetchGroups = useCallback(async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       const response = await axios.get('/api/groups', {
         params: { page: currentPage, search: searchTerm }
-      })
-      setGroups(response.data.groups)
-      setTotalPages(response.data.totalPages)
+      });
+      setGroups(response.data.groups);
+      setTotalPages(response.data.totalPages);
     } catch (error) {
-      console.error('Error fetching groups:', error)
+      console.error('Error fetching groups:', error);
       toast({
         title: "Error",
         description: "Failed to load groups. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [currentPage, searchTerm]); 
+
+  useEffect(() => {
+    fetchGroups();
+  }, [fetchGroups]); 
 
   const handleCreateGroup = async () => {
     try {
-      const response = await axios.post('/api/groups', { name: 'New Group', description: 'New group description' })
-      setGroups([...groups, response.data])
+      const response = await axios.post<Group>('/api/groups', {
+        name: 'New Group',
+        description: 'New group description'
+      });
+      setGroups(prevGroups => [...prevGroups, response.data]);
       toast({
         title: "Success",
         description: "New group created successfully.",
-      })
+      });
     } catch (error) {
-      console.error('Error creating group:', error)
+      console.error('Error creating group:', error);
       toast({
         title: "Error",
         description: "Failed to create new group. Please try again.",
         variant: "destructive",
-      })
+      });
     }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
   }
+
 
   return (
     <div className="container mx-auto p-6">
