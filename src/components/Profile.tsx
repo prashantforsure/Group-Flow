@@ -73,8 +73,8 @@ export default function Profile() {
 
     fetchProfileData()
   }, [])
-// @ts-expect-error This is expected to fail because the function
-  const onSubmit = async (data) => {
+
+  const onSubmit = async (data: any) => {
     try {
       const response = await axios.put('/api/users/me', data)
       setUser(response.data)
