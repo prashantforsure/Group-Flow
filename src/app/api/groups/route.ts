@@ -1,6 +1,6 @@
 import { authOptions } from "@/lib/auth/config";
 import prisma from "@/lib/db";
-import { createGroupSchema } from "@/lib/validations/group";
+
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -107,6 +107,7 @@ export async function GET(req: NextRequest) {
       }
   
       const { name , description } = await req.json();
+      
       if (!name || !description) {
         return NextResponse.json({ error: "Name and description are required" }, { status: 400 });
       }

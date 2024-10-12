@@ -32,7 +32,7 @@ model User {
   workHoursPerWeek      Int?                 @default(40)
   timezone              String?
   sentInvitations GroupInvitation[]
-  channelMessages ChannelMessage[]
+  
   accounts          Account[]
   sessions          Session[]
   ownedGroups          Group[]              @relation("GroupOwner")
@@ -288,7 +288,7 @@ model Channel {
   type                 ChannelType          @default(GENERAL)
   group                Group                @relation(fields: [groupId], references: [id])
   groupId              String
-   messages ChannelMessage[]
+   
 }
 
 enum ChannelType {
@@ -341,7 +341,7 @@ model Attachment {
   comments             Comment[]
   documents            Document[]
   messages             Message[]
-  channelMessages   ChannelMessage[] 
+  
 }
 
 model ChecklistItem {
@@ -389,21 +389,6 @@ model GroupInvitation {
   inviterId             String
   createdAt             DateTime             @default(now())
   updatedAt             DateTime             @updatedAt
-}
-
-model ChannelMessage {
-  id        String      @id @default(cuid())
-  content   String
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  channel   Channel     @relation(fields: [channelId], references: [id])
-  channelId String
-  sender    User        @relation(fields: [senderId], references: [id])
-  senderId  String
-  attachments Attachment[]
-
-  @@index([channelId])
-  @@index([senderId])
 }
 
 enum InviteStatus {
