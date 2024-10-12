@@ -4,95 +4,60 @@ import { updateGroupSchema } from "@/lib/validations/group";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
-export async function GET({ params }: { params: { id: string } }){
-    try{
-       const session = await getServerSession(authOptions)
-       if(!session?.user?.email){
-        return NextResponse.json({
-            message: "unauthorized"
-        },{
-            status: 401
-        })
-       }
-       const group = await prisma.group.findUnique({
-        where: { id: params.id },
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const groupId = params.id;
+
+    const group = await prisma.group.findUnique({
+      where: { id: groupId },
       include: {
-        owner: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true,
-          },
-        },
         members: {
-          select: {
-            role: true,
-            joinedAt: true,
+          include: {
             user: {
               select: {
                 id: true,
                 name: true,
                 email: true,
-                image: true,
+                avatar: true,
               },
             },
           },
         },
-        channels: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-          },
-        },
-        tasks: {
-          select: {
-            id: true,
-            title: true,
-            status: true,
-            priority: true,
-            dueDate: true,
-          },
-          take: 5,
-          orderBy: {
-            updatedAt: 'desc',
-          },
-        },
-        _count: {
-          select: {
-            tasks: true,
-            members: true,
-            channels: true,
-          },
-        },
       },
-       })
+    });
 
-       if(!group){
-        return NextResponse.json({
-            message: "group does not exist"
-        },{
-            status: 404
-        })
-       }
-       const isMember = group.members.some(
-        member => member.user.email === session.user.email
+    if (!group) {
+      return NextResponse.json(
+        { error: 'Group not found' },
+        { status: 404 }
       );
-      const isOwner = group.owner.email === session.user.email;
-  
-      if (!isMember && !isOwner && group.visibility === 'PRIVATE') {
-        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-      }
-  
-      return NextResponse.json(group);
-    }catch(error){
-        console.error("Error fetching group:", error);
+    }
+
+    const formattedGroup = {
+      id: group.id,
+      name: group.name,
+      description: group.description,
+      members: group.members.map((member) => ({
+        id: member.user.id,
+        name: member.user.name || '',
+        email: member.user.email,
+        avatar: member.user.avatar || '',
+        role: member.role.toLowerCase(),
+      })),
+    };
+
+    return NextResponse.json(formattedGroup);
+  } catch (error) {
+    console.error('Error fetching group:', error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Internal server error' },
       { status: 500 }
     );
-    }
+  }
 }
 
 export async function PUT(req: NextRequest, { params } : { params: { id : string }}){
