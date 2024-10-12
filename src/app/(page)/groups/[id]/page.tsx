@@ -11,8 +11,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, Settings, BarChart } from 'lucide-react'
+import { Plus, Settings, BarChart, CircleUser } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
@@ -23,32 +22,38 @@ type User = {
   avatar: string
 }
 
+
+
 type Task = {
   id: string
   title: string
-  status: 'todo' | 'in_progress' | 'completed'
-  assignee: User
-  progress: number
-  subtasks: { id: string; title: string; completed: boolean }[]
+  status: 'PENDING' | 'IN_PROGRESS' | 'IN_REVIEW' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED'
+  priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
+  assignments: { assignee: User }[]
+  estimatedHours: number | null
+  actualHours: number | null
 }
 
 type Group = {
   id: string
   name: string
-  description: string
+  description: string | null
   members: User[]
   tasks: Task[]
 }
-
 export default function GroupDetailsPage() {
-  const { id } = useParams()
+  const { id } = useParams() as { id: string }
   const [group, setGroup] = useState<Group | null>(null)
+  const [tasks, setTasks] = useState<Task[]>([])
   const [loading, setLoading] = useState(true)
   const [newMemberEmail, setNewMemberEmail] = useState('')
   const [newTask, setNewTask] = useState({ title: '', assigneeId: '' })
 
   useEffect(() => {
-    fetchGroupDetails()
+    if (id) {
+      fetchGroupDetails()
+      fetchGroupTasks()
+    }
   }, [id])
 
   const fetchGroupDetails = async () => {
@@ -65,6 +70,20 @@ export default function GroupDetailsPage() {
       })
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchGroupTasks = async () => {
+    try {
+      const response = await axios.get(`/api/groups/${id}/tasks`)
+      setTasks(response.data)
+    } catch (error) {
+      console.error('Error fetching group tasks:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load group tasks. Please try again.",
+        variant: "destructive",
+      })
     }
   }
 
@@ -94,7 +113,7 @@ export default function GroupDetailsPage() {
         title: "Success",
         description: "New task added to the group.",
       })
-      fetchGroupDetails()
+      fetchGroupTasks()
       setNewTask({ title: '', assigneeId: '' })
     } catch (error) {
       console.error('Error adding task:', error)
@@ -106,14 +125,14 @@ export default function GroupDetailsPage() {
     }
   }
 
-  const updateTaskStatus = async (taskId: string, status: 'todo' | 'in_progress' | 'completed') => {
+  const updateTaskStatus = async (taskId: string, status: Task['status']) => {
     try {
       await axios.put(`/api/tasks/${taskId}`, { status })
       toast({
         title: "Success",
         description: "Task status updated.",
       })
-      fetchGroupDetails()
+      fetchGroupTasks()
     } catch (error) {
       console.error('Error updating task status:', error)
       toast({
@@ -124,75 +143,57 @@ export default function GroupDetailsPage() {
     }
   }
 
-  const updateSubtaskStatus = async (taskId: string, subtaskId: string, completed: boolean) => {
-    try {
-      await axios.put(`/api/tasks/${taskId}/subtasks/${subtaskId}`, { completed })
-      toast({
-        title: "Success",
-        description: "Subtask status updated.",
-      })
-      fetchGroupDetails()
-    } catch (error) {
-      console.error('Error updating subtask status:', error)
-      toast({
-        title: "Error",
-        description: "Failed to update subtask status. Please try again.",
-        variant: "destructive",
-      })
-    }
-  }
-
-  const renderTaskList = (status: 'todo' | 'in_progress' | 'completed') => {
-    if (!group) return null
-   
+  const renderTaskList = (status: Task['status']) => {
+    const filteredTasks = tasks.filter((task) => task.status === status)
     
-  //   return (
-  //     <div key={status} className="space-y-2">
-  //       <h3 className="font-semibold capitalize">{status.replace('_', ' ')}</h3>
-  //       {group.tasks.length > 0 ? (
-  //         group.tasks.map((task) => (
-  //           <Card key={task.id} className="p-4">
-  //             <h4 className="font-medium">{task.title}</h4>
-  //             <div className="flex items-center mt-2">
-  //               <Avatar className="h-6 w-6 mr-2">
-  //                 <AvatarImage src={task.assignee.avatar} alt={task.assignee.name} />
-  //                 <AvatarFallback>{task.assignee.name[0]}</AvatarFallback>
-  //               </Avatar>
-  //               <span className="text-sm text-gray-500">{task.assignee.name}</span>
-  //             </div>
-  //             <Progress value={task.progress} className="mt-2" />
-  //             <div className="mt-2 space-y-1">
-  //               {task.subtasks.map((subtask) => (
-  //                 <div key={subtask.id} className="flex items-center">
-  //                   <Checkbox
-  //                     checked={subtask.completed}
-  //                     onCheckedChange={(checked) => updateSubtaskStatus(task.id, subtask.id, checked as boolean)}
-  //                   />
-  //                   <span className="ml-2 text-sm">{subtask.title}</span>
-  //                 </div>
-  //               ))}
-  //             </div>
-  //             <Select
-  //               value={task.status}
-  //               onValueChange={(value) => updateTaskStatus(task.id, value as 'todo' | 'in_progress' | 'completed')}
-  //             >
-  //               <SelectTrigger className="mt-2">
-  //                 <SelectValue placeholder="Change status" />
-  //               </SelectTrigger>
-  //               <SelectContent>
-  //                 <SelectItem value="todo">To Do</SelectItem>
-  //                 <SelectItem value="in_progress">In Progress</SelectItem>
-  //                 <SelectItem value="completed">Completed</SelectItem>
-  //               </SelectContent>
-  //             </Select>
-  //           </Card>
-  //         ))
-  //       ) : (
-  //         <p className="text-gray-500">No tasks in this status</p>
-  //       )}
-  //     </div>
-  //   )
-   }
+    return (
+      <div key={status} className="space-y-2">
+        <h3 className="font-semibold capitalize">{status.toLowerCase().replace('_', ' ')}</h3>
+        {filteredTasks.length > 0 ? (
+          filteredTasks.map((task) => (
+            <Card key={task.id} className="p-4">
+              <h4 className="font-medium">{task.title}</h4>
+              <div className="flex items-center mt-2">
+                {task.assignments[0] && task.assignments[0].assignee && (
+                  <>
+                    <Avatar className="h-6 w-6 mr-2">
+                      <AvatarImage src={task.assignments[0].assignee.avatar} alt={task.assignments[0].assignee.name} />
+                      <AvatarFallback>{task.assignments[0].assignee.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-gray-500">{task.assignments[0].assignee.name}</span>
+                  </>
+                )}
+              </div>
+              {task.estimatedHours && task.actualHours && (
+                <Progress 
+                  value={(task.actualHours / task.estimatedHours) * 100} 
+                  className="mt-2" 
+                />
+              )}
+              <Select
+                value={task.status}
+                onValueChange={(value) => updateTaskStatus(task.id, value as Task['status'])}
+              >
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Change status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PENDING">Pending</SelectItem>
+                  <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                  <SelectItem value="IN_REVIEW">In Review</SelectItem>
+                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                  <SelectItem value="ON_HOLD">On Hold</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </Card>
+          ))
+        ) : (
+          <p className="text-gray-500">No tasks in this status</p>
+        )}
+      </div>
+    )
+  }
 
   if (loading) {
     return <div className="flex items-center justify-center h-screen">Loading...</div>
@@ -227,7 +228,7 @@ export default function GroupDetailsPage() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {['todo', 'in_progress', 'completed'].map((status) => renderTaskList(status as 'todo' | 'in_progress' | 'completed'))}
+                {['PENDING', 'IN_PROGRESS', 'COMPLETED'].map((status) => renderTaskList(status as Task['status']))}
               </div>
               <Dialog>
                 <DialogTrigger asChild>
@@ -260,7 +261,11 @@ export default function GroupDetailsPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {group.members.map((member) => (
-                            <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                            member && (
+                              <SelectItem key={member.id} value={member.id}>
+                                {member.name}
+                              </SelectItem>
+                            )
                           ))}
                         </SelectContent>
                       </Select>
@@ -283,14 +288,14 @@ export default function GroupDetailsPage() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {group.members.map((member) => (
-                  <Card key={member.id} className="p-4">
+                  <Card key={member.id } className="p-4">
                     <div className="flex items-center space-x-4">
                       <Avatar>
-                        <AvatarImage src={member.avatar} alt={member.name} />
-                        <AvatarFallback>{member.name[0]}</AvatarFallback>
+                        
+                        <AvatarFallback> <CircleUser /> </AvatarFallback>
                       </Avatar>
                       <div>
-                        <p className="font-medium">{member.name}</p>
+                        <p className="font-medium">{member.name }</p>
                         <p className="text-sm text-gray-500">{member.email}</p>
                       </div>
                     </div>
@@ -309,6 +314,7 @@ export default function GroupDetailsPage() {
           </Card>
         </TabsContent>
 
+
         <TabsContent value="overview" className="space-y-4">
           <Card>
             <CardHeader>
@@ -321,7 +327,7 @@ export default function GroupDetailsPage() {
                     <CardTitle>Total Tasks</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="text-3xl font-bold"></div>
+                    <div className="text-3xl font-bold">{tasks.length}</div>
                   </CardContent>
                 </Card>
                 <Card>
@@ -338,22 +344,24 @@ export default function GroupDetailsPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-3xl font-bold">
-                      {/* {Math.round((group.tasks.filter(t => t.status === 'completed').length / group.tasks.length) * 100)}% */}
+                      {tasks.length > 0
+                        ? Math.round((tasks.filter(t => t.status === 'COMPLETED').length / tasks.length) * 100)
+                        : 0}%
                     </div>
                   </CardContent>
                 </Card>
               </div>
-              {/* <Card className="mt-4">
+              <Card className="mt-4">
                 <CardHeader>
                   <CardTitle>Task Distribution</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <BarChart
-                  //@ts-expect-error there is some type error
+                  //@ts-expect-error
                     data={[
-                      { name: 'To Do', value: group.tasks.filter(t => t.status === 'todo').length },
-                      { name: 'In Progress', value: group.tasks.filter(t => t.status === 'in_progress').length },
-                      { name: 'Completed', value: group.tasks.filter(t => t.status === 'completed').length },
+                      { name: 'Pending', value: tasks.filter(t => t.status === 'PENDING').length },
+                      { name: 'In Progress', value: tasks.filter(t => t.status === 'IN_PROGRESS').length },
+                      { name: 'Completed', value: tasks.filter(t => t.status === 'COMPLETED').length },
                     ]}
                     index="name"
                     categories={['value']}
@@ -362,7 +370,7 @@ export default function GroupDetailsPage() {
                     className="mt-6"
                   />
                 </CardContent>
-              </Card> */}
+              </Card>
             </CardContent>
           </Card>
         </TabsContent>
