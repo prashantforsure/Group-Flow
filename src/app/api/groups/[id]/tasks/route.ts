@@ -78,3 +78,29 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+
+export async function POST(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const groupId = params.id;
+    const { title, assigneeId } = await request.json();
+
+    const task = await prisma.task.create({
+      data: {
+        title,
+        status: 'PENDING',
+        group: { connect: { id: groupId } },
+        creator: { connect: { id: assigneeId } }, // Assuming 'creator' is the correct field
+        // If there's a separate field for assignment, use it here
+      },
+    });
+
+    return NextResponse.json({ success: true, task });
+  } catch (error) {
+    console.error('Error adding task:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

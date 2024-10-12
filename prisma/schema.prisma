@@ -102,6 +102,7 @@ model Group {
   events               Event[]
 }
 
+
 enum GroupVisibility {
   PUBLIC
   PRIVATE

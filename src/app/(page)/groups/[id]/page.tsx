@@ -1,51 +1,66 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import axios from 'axios'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Plus, Settings, BarChart } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import Link from 'next/link'
 
-
-type Member = {
+type User = {
   id: string
   name: string
   email: string
   avatar: string
-  role: 'admin' | 'member'
+}
+
+type Task = {
+  id: string
+  title: string
+  status: 'todo' | 'in_progress' | 'completed'
+  assignee: User
+  progress: number
+  subtasks: { id: string; title: string; completed: boolean }[]
 }
 
 type Group = {
   id: string
   name: string
   description: string
-  members: Member[]
+  members: User[]
+  tasks: Task[]
 }
 
-export default function GroupInfoPage() {
+export default function GroupDetailsPage() {
   const { id } = useParams()
   const [group, setGroup] = useState<Group | null>(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [newMemberEmail, setNewMemberEmail] = useState('')
+  const [newTask, setNewTask] = useState({ title: '', assigneeId: '' })
 
   useEffect(() => {
-    fetchGroupInfo()
+    fetchGroupDetails()
   }, [id])
 
-  const fetchGroupInfo = async () => {
+  const fetchGroupDetails = async () => {
     try {
       setLoading(true)
-      setError(null)
-      const response = await axios.get<Group>(`/api/groups/${id}`)
+      const response = await axios.get(`/api/groups/${id}`)
       setGroup(response.data)
-    } catch (err) {
-      console.error('Error fetching group info:', err)
-      setError('Failed to load group information. Please try again.')
+    } catch (error) {
+      console.error('Error fetching group details:', error)
       toast({
         title: "Error",
-        description: "Failed to load group information. Please try again.",
+        description: "Failed to load group details. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -53,55 +68,305 @@ export default function GroupInfoPage() {
     }
   }
 
-  if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading group information...</div>
+  const addMember = async () => {
+    try {
+      await axios.post(`/api/groups/${id}/members`, { email: newMemberEmail })
+      toast({
+        title: "Success",
+        description: "New member added to the group.",
+      })
+      fetchGroupDetails()
+      setNewMemberEmail('')
+    } catch (error) {
+      console.error('Error adding member:', error)
+      toast({
+        title: "Error",
+        description: "Failed to add new member. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
-  if (error) {
-    return <div className="flex items-center justify-center h-screen text-red-500">{error}</div>
+  const addTask = async () => {
+    try {
+      await axios.post(`/api/groups/${id}/tasks`, newTask)
+      toast({
+        title: "Success",
+        description: "New task added to the group.",
+      })
+      fetchGroupDetails()
+      setNewTask({ title: '', assigneeId: '' })
+    } catch (error) {
+      console.error('Error adding task:', error)
+      toast({
+        title: "Error",
+        description: "Failed to add new task. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const updateTaskStatus = async (taskId: string, status: 'todo' | 'in_progress' | 'completed') => {
+    try {
+      await axios.put(`/api/tasks/${taskId}`, { status })
+      toast({
+        title: "Success",
+        description: "Task status updated.",
+      })
+      fetchGroupDetails()
+    } catch (error) {
+      console.error('Error updating task status:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update task status. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const updateSubtaskStatus = async (taskId: string, subtaskId: string, completed: boolean) => {
+    try {
+      await axios.put(`/api/tasks/${taskId}/subtasks/${subtaskId}`, { completed })
+      toast({
+        title: "Success",
+        description: "Subtask status updated.",
+      })
+      fetchGroupDetails()
+    } catch (error) {
+      console.error('Error updating subtask status:', error)
+      toast({
+        title: "Error",
+        description: "Failed to update subtask status. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const renderTaskList = (status: 'todo' | 'in_progress' | 'completed') => {
+    if (!group) return null
+   
+    
+  //   return (
+  //     <div key={status} className="space-y-2">
+  //       <h3 className="font-semibold capitalize">{status.replace('_', ' ')}</h3>
+  //       {group.tasks.length > 0 ? (
+  //         group.tasks.map((task) => (
+  //           <Card key={task.id} className="p-4">
+  //             <h4 className="font-medium">{task.title}</h4>
+  //             <div className="flex items-center mt-2">
+  //               <Avatar className="h-6 w-6 mr-2">
+  //                 <AvatarImage src={task.assignee.avatar} alt={task.assignee.name} />
+  //                 <AvatarFallback>{task.assignee.name[0]}</AvatarFallback>
+  //               </Avatar>
+  //               <span className="text-sm text-gray-500">{task.assignee.name}</span>
+  //             </div>
+  //             <Progress value={task.progress} className="mt-2" />
+  //             <div className="mt-2 space-y-1">
+  //               {task.subtasks.map((subtask) => (
+  //                 <div key={subtask.id} className="flex items-center">
+  //                   <Checkbox
+  //                     checked={subtask.completed}
+  //                     onCheckedChange={(checked) => updateSubtaskStatus(task.id, subtask.id, checked as boolean)}
+  //                   />
+  //                   <span className="ml-2 text-sm">{subtask.title}</span>
+  //                 </div>
+  //               ))}
+  //             </div>
+  //             <Select
+  //               value={task.status}
+  //               onValueChange={(value) => updateTaskStatus(task.id, value as 'todo' | 'in_progress' | 'completed')}
+  //             >
+  //               <SelectTrigger className="mt-2">
+  //                 <SelectValue placeholder="Change status" />
+  //               </SelectTrigger>
+  //               <SelectContent>
+  //                 <SelectItem value="todo">To Do</SelectItem>
+  //                 <SelectItem value="in_progress">In Progress</SelectItem>
+  //                 <SelectItem value="completed">Completed</SelectItem>
+  //               </SelectContent>
+  //             </Select>
+  //           </Card>
+  //         ))
+  //       ) : (
+  //         <p className="text-gray-500">No tasks in this status</p>
+  //       )}
+  //     </div>
+  //   )
+   }
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>
   }
 
   if (!group) {
-    return <div className="flex items-center justify-center h-screen">No group information available.</div>
+    return <div className="flex items-center justify-center h-screen">Group not found</div>
   }
 
   return (
     <div className="container mx-auto p-6">
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">{group.name}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-gray-600 dark:text-gray-300">{group.description}</p>
-        </CardContent>
-      </Card>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">{group.name}</h1>
+        <Button asChild>
+          <Link href={`/groups/${id}/settings`}>
+            <Settings className="mr-2 h-4 w-4" /> Group Settings
+          </Link>
+        </Button>
+      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold">Group Members</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {group.members.map((member) => (
-              <Card key={member.id} className="p-4">
-                <div className="flex items-center space-x-4">
-                  <Avatar>
-                    <AvatarImage src={member.avatar} alt={member.name} />
-                    <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{member.name}</p>
-                    <p className="text-sm text-gray-500">{member.email}</p>
+      <Tabs defaultValue="tasks" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="tasks">Tasks</TabsTrigger>
+          <TabsTrigger value="members">Members</TabsTrigger>
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="tasks" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Tasks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {['todo', 'in_progress', 'completed'].map((status) => renderTaskList(status as 'todo' | 'in_progress' | 'completed'))}
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="mt-4">
+                    <Plus className="mr-2 h-4 w-4" /> Add Task
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Add New Task</DialogTitle>
+                    <DialogDescription>Create a new task for this group.</DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Input
+                        id="task-title"
+                        value={newTask.title}
+                        onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                        className="col-span-4"
+                        placeholder="Task title"
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Select
+                        value={newTask.assigneeId}
+                        onValueChange={(value) => setNewTask({ ...newTask, assigneeId: value })}
+                      >
+                        <SelectTrigger className="col-span-4">
+                          <SelectValue placeholder="Assign to" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {group.members.map((member) => (
+                            <SelectItem key={member.id} value={member.id}>{member.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <Badge variant={member.role === 'admin' ? 'default' : 'secondary'}>
-                    {member.role}
-                  </Badge>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+                  <DialogFooter>
+                    <Button onClick={addTask}>Add Task</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="members" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Members</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {group.members.map((member) => (
+                  <Card key={member.id} className="p-4">
+                    <div className="flex items-center space-x-4">
+                      <Avatar>
+                        <AvatarImage src={member.avatar} alt={member.name} />
+                        <AvatarFallback>{member.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{member.name}</p>
+                        <p className="text-sm text-gray-500">{member.email}</p>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+              <div className="mt-4 flex space-x-2">
+                <Input
+                  placeholder="New member's email"
+                  value={newMemberEmail}
+                  onChange={(e) => setNewMemberEmail(e.target.value)}
+                />
+                <Button onClick={addMember}>Add Member</Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="overview" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Group Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Total Tasks</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold"></div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Members</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{group.members.length}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Completion Rate</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">
+                      {/* {Math.round((group.tasks.filter(t => t.status === 'completed').length / group.tasks.length) * 100)}% */}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+              {/* <Card className="mt-4">
+                <CardHeader>
+                  <CardTitle>Task Distribution</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <BarChart
+                  //@ts-expect-error there is some type error
+                    data={[
+                      { name: 'To Do', value: group.tasks.filter(t => t.status === 'todo').length },
+                      { name: 'In Progress', value: group.tasks.filter(t => t.status === 'in_progress').length },
+                      { name: 'Completed', value: group.tasks.filter(t => t.status === 'completed').length },
+                    ]}
+                    index="name"
+                    categories={['value']}
+                    colors={['blue']}
+                    valueFormatter={(value: number) => `${value} tasks`}
+                    className="mt-6"
+                  />
+                </CardContent>
+              </Card> */}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
