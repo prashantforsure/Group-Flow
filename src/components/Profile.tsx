@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Icons } from "@/components/ui/icons"
+import { CircleUserRound } from 'lucide-react'
 
 // Define types based on the schema
 type User = {
@@ -60,17 +61,13 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
-        const [userRes, metricsRes] = await Promise.all([
-          axios.get('/api/users/me'),
-          axios.get('/api/analytics/users')
-        ])
-        setUser(userRes.data)
-        setMetrics(metricsRes.data)
-      } catch (error) {
+        axios.get("/api/users/me").then((response) => {
+          setUser(response.data)
+        })
+      }catch(error){
         console.error('Error fetching profile data:', error)
       }
     }
-
     fetchProfileData()
   }, [])
 
@@ -97,11 +94,12 @@ export default function Profile() {
           <CardHeader>
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20">
-                <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+
+                <CircleUserRound  className="h-16 w-16 mr-2 "/>
+                
               </Avatar>
               <div>
-                <CardTitle>{user.name}</CardTitle>
+                <CardTitle className='text-black'>{user.name}</CardTitle>
                 <CardDescription>{user.email}</CardDescription>
               </div>
             </div>
@@ -109,10 +107,7 @@ export default function Profile() {
           <CardContent>
             {!isEditing ? (
               <>
-                <div className="mb-4">
-                  <Label>Role</Label>
-                  <p>{user.role}</p>
-                </div>
+                
                 {user.jobTitle && (
                   <div className="mb-4">
                     <Label>Job Title</Label>
@@ -138,16 +133,7 @@ export default function Profile() {
                         <Icons.twitter className="h-6 w-6" />
                       </a>
                     )}
-                    {/* {user.socialLinks.linkedin && (
-                      <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer">
-                        <Icons.linkedin className="h-6 w-6" />
-                      </a>
-                    )}
-                    {user.socialLinks.github && (
-                      <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer">
-                        <Icons.github className="h-6 w-6" />
-                      </a>
-                    )} */}
+                   
                   </div>
                 )}
               </>
@@ -176,21 +162,6 @@ export default function Profile() {
                   <Label htmlFor="skills">Skills (comma-separated)</Label>
                   <Input id="skills" {...register('skills')} />
                 </div>
-                {/* <div>
-                  <Label htmlFor="twitter">Twitter</Label>
-                  <Input id="twitter" {...register('twitter')} />
-                  {errors.twitter && <p className="text-sm text-red-500">{errors.twitter.message}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="linkedin">LinkedIn</Label>
-                  <Input id="linkedin" {...register('linkedin')} />
-                  {errors.linkedin && <p className="text-sm text-red-500">{errors.linkedin.message}</p>}
-                </div>
-                <div>
-                  <Label htmlFor="github">GitHub</Label>
-                  <Input id="github" {...register('github')} />
-                  {errors.github && <p className="text-sm text-red-500">{errors.github.message}</p>}
-                </div> */}
                 <Button type="submit">Save Changes</Button>
               </form>
             )}
