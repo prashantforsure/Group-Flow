@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body 
-        className= "min-h-screen pt-12 bg-slate-50 antialiased"
+        className= "pt-14"
       >
         <Providers>
 
