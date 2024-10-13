@@ -43,15 +43,15 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
         <DropdownMenuItem asChild className="py-2 px-4 hover:bg-gray-50">
           <Link href="/" className="flex items-center gap-3">
             <Rss className="h-4 w-4 text-gray-500" />
-            <span>Feed</span>
+            <span>Notification</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild className="py-2 px-4 hover:bg-gray-50 hover:pointer">
-          <Link href="/r/create" className="flex items-center gap-3">
+          <Link href="/groups" className="flex items-center gap-3">
             <PlusCircle className="h-4 w-4 text-gray-500" />
             <span>
-              Create Community
+              Create Group
               </span>
           </Link>
         </DropdownMenuItem>

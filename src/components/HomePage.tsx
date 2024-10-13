@@ -15,7 +15,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-white text-black">
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md">
+      {/* <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link className="flex items-center space-x-2" href="#">
             <svg
@@ -57,7 +57,7 @@ export default function HomePage() {
             </Button>
           </div>
         </div>
-      </header>
+      </header> */}
       <main className="flex-grow">
         <section className="container mx-auto px-4 py-24 md:py-32 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">

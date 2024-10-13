@@ -10,25 +10,46 @@ const Navbar = async () => {
   const session = await getServerSession(authOptions)
 
   return (
-    <div className='fixed top-0 inset-x-0 h-20 border-b border-white/10 bg-black/30 backdrop-blur-xl z-[10]'>
-      <div className='container max-w-7xl h-full mx-auto flex items-center justify-between'>
-        <Link href='/' className='flex items-center gap-2 group'>
-          <div className='relative'>
-            <div className='absolute -inset-0.5 bg-gradient-to-r from-pink-600 to-purple-600 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt'></div>
-            <Sparkles className='h-8 w-8 text-white relative' />
-          </div>
-          <p className='hidden text-xl font-extrabold md:block bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500 group-hover:bg-gradient-to-l transition-all duration-300'>
-            Group Flow.
-          </p>
-        </Link>
-
+    <div className='sticky top-0 z-50 bg-white/80 backdrop-blur-md'>
+      <div className='container mx-auto px-4 py-4 flex items-center justify-between'>
+      <Link className="flex items-center space-x-2" href="/">
+            <svg
+              className="h-8 w-8 text-[#1ABCFE]"
+              fill="none"
+              height="24"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              width="24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3" />
+            </svg>
+            <span className="font-bold text-xl">GroupFlow</span>
+          </Link>
+          <nav className="hidden md:flex space-x-8">
+            <Link className="text-sm hover:text-[#A259FF] transition-colors" href="#">
+              Features
+            </Link>
+            <Link className="text-sm hover:text-[#A259FF] transition-colors" href="#">
+              Enterprise
+            </Link>
+            <Link className="text-sm hover:text-[#A259FF] transition-colors" href="#">
+              Pricing
+            </Link>
+            <Link className="text-sm hover:text-[#A259FF] transition-colors" href="#">
+              Community
+            </Link>
+          </nav>
         <div className='flex items-center gap-4'>
           {session?.user ? (
             <>
               <Link href='/dashboard'>
                 <Button 
                   variant="ghost" 
-                  className='rounded-full px-6 py-2 text-white bg-white/10 hover:bg-white/20 transition-all duration-300 ease-in-out hover:shadow-[0_0_15px_rgba(255,255,255,0.5)] hover:-translate-y-0.5'
+                  className='rounded-full px-6 py-2 text-sm hover:text-[#A259FF] transition-colors text-black border border-slate-900'
                 >
                   Dashboard
                 </Button>

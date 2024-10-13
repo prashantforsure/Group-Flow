@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 
-import { Users } from 'lucide-react'
+import { Users, Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
 type Task = {
@@ -99,88 +99,113 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="container mx-auto p-6 bg-gradient-to-br from-purple-900 to-indigo-900 min-h-screen">
-      <h1 className="text-4xl font-bold mb-6 text-white">Dashboard</h1>
-      <Tabs defaultValue="tasks" className="space-y-6">
-        <TabsList className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg">
-          <TabsTrigger value="tasks" className="text-white">Tasks</TabsTrigger>
-          <TabsTrigger value="groups" className="text-white">Groups</TabsTrigger>
-        </TabsList>
-        <TabsContent value="tasks">
-          {loading.tasks ? (
-            <div className="text-white">Loading tasks...</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {tasks.length > 0 ? tasks.map((task) => (
-                <Card key={task.id} className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border-none text-white">
-                  <CardHeader>
-                    <CardTitle>{task.title}</CardTitle>
-                    <CardDescription className="text-gray-300">
-                      Group: {task.group.name}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Progress value={getProgressPercentage(task.status)} className="mb-2" />
-                    <p>Status: {task.status}</p>
-                    <p>Priority: {task.priority}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <div className="flex flex-wrap gap-2">
-                      {task.assignments.map((assignment) => (
-                        <Avatar key={assignment.assignee.id}>
-                          <AvatarImage src={assignment.assignee.image} alt={assignment.assignee.name} />
-                          <AvatarFallback>{assignment.assignee.name[0]}</AvatarFallback>
-                        </Avatar>
-                      ))}
-                    </div>
-                  </CardFooter>
-                </Card>
-              )) : (
-                <p className="text-white">No tasks found.</p>
-              )}
-            </div>
-          )}
-        </TabsContent>
-        <TabsContent value="groups">
-          {loading.groups ? (
-            <div className="text-white">Loading groups...</div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {groups.length > 0 ? groups.map((group) => (
-                <Card key={group.id} className="bg-white bg-opacity-10 backdrop-filter backdrop-blur-lg border-none text-white">
-                  <CardHeader>
-                    <CardTitle className="text-2xl font-bold">{group.name}</CardTitle>
-                    <CardDescription className="text-gray-300">{group.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Users className="h-4 w-4 text-gray-400" />
-                      <span>{group.memberCount} members</span>
-                    </div>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <Badge variant={group.userRole === 'ADMIN' ? 'default' : 'secondary'}>
-                        {group.userRole}
-                      </Badge>
-                      {group.recentActivity && (
-                        <Badge variant="outline" className="bg-green-100 text-green-800 bg-opacity-10">
-                          Recent Activity
+    <div className="min-h-screen bg-white">
+      <header className="bg-white border-b border-gray-200">
+        <div className="container mx-auto px-4 py-6">
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        </div>
+      </header>
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="tasks" className="space-y-8">
+          <TabsList className="bg-gray-100 p-1 rounded-full inline-flex">
+            <TabsTrigger value="tasks" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
+              Tasks
+            </TabsTrigger>
+            <TabsTrigger value="groups" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
+              Groups
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="tasks" className="space-y-6">
+            {loading.tasks ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-[#A259FF]" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tasks.length > 0 ? tasks.map((task) => (
+                  <Card key={task.id} className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+                    <CardHeader className="bg-gradient-to-r from-[#A259FF] to-[#1ABCFE] text-white">
+                      <CardTitle>{task.title}</CardTitle>
+                      <CardDescription className="text-gray-100">
+                        Group: {task.group.name}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <Progress value={getProgressPercentage(task.status)} className="mb-4" />
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-500">Status</span>
+                        <Badge variant={task.status === 'COMPLETED' ? 'default' : 'secondary'}>
+                          {task.status}
                         </Badge>
-                      )}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button asChild className="w-full bg-primary hover:bg-primary/90">
-                      <Link href={`/groups/${group.id}`}>View Group</Link>
-                    </Button>
-                  </CardFooter>
-                </Card>
-              )) : (
-                <p className="text-white">No groups found.</p>
-              )}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm font-medium text-gray-500">Priority</span>
+                        <Badge variant="outline" className="font-semibold">
+                          {task.priority}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="bg-gray-50 flex justify-between items-center">
+                      <div className="flex -space-x-2 overflow-hidden">
+                        {task.assignments.map((assignment) => (
+                          <Avatar key={assignment.assignee.id} className="border-2 border-white">
+                            <AvatarImage src={assignment.assignee.image} alt={assignment.assignee.name} />
+                            <AvatarFallback>{assignment.assignee.name[0]}</AvatarFallback>
+                          </Avatar>
+                        ))}
+                      </div>
+                      <Button variant="ghost" size="sm">View Details</Button>
+                    </CardFooter>
+                  </Card>
+                )) : (
+                  <p className="text-gray-500 text-center col-span-full">No tasks found.</p>
+                )}
+              </div>
+            )}
+          </TabsContent>
+          <TabsContent value="groups" className="space-y-6">
+            {loading.groups ? (
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-[#A259FF]" />
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {groups.length > 0 ? groups.map((group) => (
+                  <Card key={group.id} className="overflow-hidden transition-shadow duration-300 hover:shadow-lg">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-bold">{group.name}</CardTitle>
+                      <CardDescription className="text-gray-600">{group.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex items-center space-x-2 mb-4">
+                        <Users className="h-4 w-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">{group.memberCount} members</span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Badge variant={group.userRole === 'ADMIN' ? 'default' : 'secondary'} className="text-xs">
+                          {group.userRole}
+                        </Badge>
+                        {group.recentActivity && (
+                          <Badge variant="outline" className="bg-green-100 text-green-800 text-xs">
+                            Recent Activity
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                    <CardFooter>
+                      <Button asChild className="w-full bg-[#A259FF] hover:bg-[#1ABCFE] transition-colors">
+                        <Link href={`/groups/${group.id}`}>View Group</Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                )) : (
+                  <p className="text-gray-500 text-center col-span-full">No groups found.</p>
+                )}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </main>
     </div>
   )
 }
