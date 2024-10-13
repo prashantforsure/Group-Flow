@@ -27,7 +27,7 @@ type User = {
 type Task = {
   id: string
   title: string
-  status: 'PENDING' | 'IN_PROGRESS' | 'IN_REVIEW' | 'COMPLETED' | 'ON_HOLD' | 'CANCELLED'
+  status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' 
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
   assignments: { assignee: User }[]
   estimatedHours: number | null
@@ -180,10 +180,8 @@ export default function GroupDetailsPage() {
                 <SelectContent>
                   <SelectItem value="PENDING">Pending</SelectItem>
                   <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                  <SelectItem value="IN_REVIEW">In Review</SelectItem>
                   <SelectItem value="COMPLETED">Completed</SelectItem>
-                  <SelectItem value="ON_HOLD">On Hold</SelectItem>
-                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+
                 </SelectContent>
               </Select>
             </Card>
