@@ -94,9 +94,7 @@ export default function Profile() {
           <CardHeader>
             <div className="flex items-center space-x-4">
               <Avatar className="h-20 w-20">
-
                 <CircleUserRound  className="h-16 w-16 mr-2 "/>
-                
               </Avatar>
               <div>
                 <CardTitle className='text-black'>{user.name}</CardTitle>

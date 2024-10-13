@@ -161,7 +161,7 @@ export default function GroupSettingsPage() {
             </div>
           </CardContent>
         </Card>
-
+{/* 
         <Card className="mb-6">
           <CardHeader>
             <CardTitle>Member Permissions</CardTitle>
@@ -193,9 +193,9 @@ export default function GroupSettingsPage() {
               />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
-        <Card className="mb-6">
+        {/* <Card className="mb-6">
           <CardHeader>
             <CardTitle>Notification Settings</CardTitle>
             <CardDescription>Manage group notification preferences</CardDescription>
@@ -226,7 +226,7 @@ export default function GroupSettingsPage() {
               />
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
 
         <Card className="mb-6">
           <CardHeader>
