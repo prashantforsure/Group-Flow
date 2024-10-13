@@ -28,12 +28,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body 
-        className= "pt-14"
+        className= ""
       >
         <Providers>
 
           <div className=''>
-          <Navbar />
+          {/* <Navbar /> */}
             {children}
             <Toaster />
           </div>

@@ -302,7 +302,7 @@ export default function GroupDetailsPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 bg-gradient-to-br from-purple-900 to-indigo-900 min-h-screen text-white">
+    <div className="container mx-auto p-6 bg-gradient-to-br from-purple-500 to-indigo-500 min-h-screen text-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">{group.name}</h1>
         <Button asChild variant="outline" className='text-black'>
