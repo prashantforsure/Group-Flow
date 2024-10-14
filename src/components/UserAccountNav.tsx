@@ -4,9 +4,9 @@ import { User } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { DropdownMenuContent, DropdownMenu, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuItem } from './ui/dropdown-menu'
 import Link from 'next/link'
-
 import { Settings, LogOut, Rss, PlusCircle } from 'lucide-react'
 import { UserAvatar } from './UserAvatar'
+import { motion } from 'framer-motion'
 
 interface UserAccountNavProps extends React.HTMLAttributes<HTMLDivElement> {
   user: Pick<User, 'name' | 'image' | 'email'>
@@ -16,70 +16,78 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger className="focus:outline-none">
-        <UserAvatar
-          user={{ name: user.name || null, image: user.image || null }}
-          className="h-8 w-8 ring-2 ring-white hover:ring-gray-300 transition-all duration-200"
-        />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 bg-white rounded-xl shadow-lg py-1" align="end">
-        <Link href='/profile'>
-        <div className="flex items-center gap-3 p-3 border-b border-gray-100">
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <UserAvatar
             user={{ name: user.name || null, image: user.image || null }}
-            className="h-8 w-8"
+            className="h-12 w-12 ring-2 ring-[#A259FF] hover:ring-[#1ABCFE] transition-all duration-300"
           />
-          <div className="flex flex-col">
-            {user.name && <p className="font-semibold text-sm">{user.name}</p>}
-            {user.email && (
-              <p className="text-xs text-gray-500 truncate">
-                {user.email}
-              </p>
-            )}
-          </div>
-        </div>
+        </motion.div>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-72 bg-white rounded-lg shadow-lg py-1 overflow-hidden" align="end">
+        <Link href='/profile'>
+          <motion.div
+            className="flex items-center gap-4 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors duration-200"
+            whileHover={{ backgroundColor: 'rgba(162, 89, 255, 0.05)' }}
+          >
+            <UserAvatar
+              user={{ name: user.name || null, image: user.image || null }}
+              className="h-12 w-12 ring-2 ring-[#A259FF]"
+            />
+            <div className="flex flex-col">
+              {user.name && <p className="font-semibold text-base text-gray-900">{user.name}</p>}
+              {user.email && (
+                <p className="text-sm text-gray-500 truncate">
+                  {user.email}
+                </p>
+              )}
+            </div>
+          </motion.div>
         </Link>
-       
         
-        <DropdownMenuItem asChild className="py-2 px-4 hover:bg-gray-50">
-          <Link href="/" className="flex items-center gap-3">
-            <Rss className="h-4 w-4 text-gray-500" />
-            <span>Notification</span>
+        <DropdownMenuItem asChild>
+          <Link href="/" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+            <Rss className="h-5 w-5 text-[#A259FF]" />
+            <span className="text-sm font-medium text-gray-700">Notifications</span>
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem asChild className="py-2 px-4 hover:bg-gray-50 hover:pointer">
-          <Link href="/groups" className="flex items-center gap-3">
-            <PlusCircle className="h-4 w-4 text-gray-500" />
-            <span>
-              Create Group
-              </span>
+        <DropdownMenuItem asChild>
+          <Link href="/groups" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+            <PlusCircle className="h-5 w-5 text-[#1ABCFE]" />
+            <span className="text-sm font-medium text-gray-700">Create Group</span>
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem asChild className="py-2 px-4 hover:bg-gray-50">
-          <Link href="/settings" className="flex items-center gap-3">
-            <Settings className="h-4 w-4 text-gray-500" />
-            <span>Settings</span>
+        <DropdownMenuItem asChild>
+          <Link href="/settings" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+            <Settings className="h-5 w-5 text-[#A259FF]" />
+            <span className="text-sm font-medium text-gray-700">Settings</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="py-2 px-4 hover:bg-gray-50">
-          <Link href="/guideline" className="flex items-center gap-3">
-            <Settings className="h-4 w-4 text-gray-500" />
-            <span>Terms and Condition</span>
+
+        <DropdownMenuItem asChild>
+          <Link href="/guideline" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+            <Settings className="h-5 w-5 text-[#1ABCFE]" />
+            <span className="text-sm font-medium text-gray-700">Terms and Conditions</span>
           </Link>
         </DropdownMenuItem>
+
         <DropdownMenuSeparator className="my-1 border-gray-100" />
         
         <DropdownMenuItem
-          className="py-2 px-4 hover:bg-gray-50 cursor-pointer flex items-center gap-3 text-red-500"
+          className="flex items-center gap-3 py-3 px-4 hover:bg-red-50 transition-colors duration-200 cursor-pointer"
           onSelect={(event) => {
             event.preventDefault()
             signOut({
               callbackUrl: `${window.location.origin}/auth/signin`,
             })
-          }}>
-          <LogOut className="h-4 w-4" />
-          <span>Sign out</span>
+          }}
+        >
+          <LogOut className="h-5 w-5 text-red-500" />
+          <span className="text-sm font-medium text-red-500">Sign out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
