@@ -322,11 +322,20 @@ export default function GroupDetailsPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
+          <div className=''>
+          <Button asChild variant="outline" className='mr-2'>
+            <Link href={`/groups/${id}/channels`}>
+              <Settings className="mr-2 h-4 w-4" />Channels
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link href={`/groups/${id}/settings`}>
               <Settings className="mr-2 h-4 w-4" /> Group Settings
             </Link>
           </Button>
+
+          </div>
+          
         </div>
       </header>
 

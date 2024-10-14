@@ -80,7 +80,7 @@ export default function HomePage() {
         </section>
         <section className="bg-gray-50 py-24">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">Trusted by industry leaders</h2>
+            <h2 className="text-3xl md:text-5xl font-bold text-center mb-16">Trusted by </h2>
             <div className="flex flex-wrap justify-center items-center gap-8 opacity-50">
               {['Company A', 'Company B', 'Company C', 'Company D', 'Company E'].map((company, index) => (
                 <div key={index} className="text-2xl font-bold">{company}</div>

@@ -13,9 +13,13 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
 import { Icons } from "@/components/ui/icons"
+<<<<<<< HEAD
 import { CircleUserRound, Briefcase, MapPin, Calendar, Mail, Phone } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+=======
+import { CircleUserRound } from 'lucide-react'
+>>>>>>> 07c4df8d610243d67a12eb658e6bcb332ec4331f
 
 type User = {
   id: string
@@ -77,6 +81,7 @@ export default function Profile() {
   useEffect(() => {
     const fetchProfileData = async () => {
       try {
+<<<<<<< HEAD
         const [userResponse, tasksResponse] = await Promise.all([
           axios.get("/api/users/me"),
           axios.get("/api/users/me/tasks")
@@ -96,6 +101,12 @@ export default function Profile() {
           averageReviewScore: 4.5 // This should be fetched from the backend in a real scenario
         })
       } catch(error) {
+=======
+        axios.get("/api/users/me").then((response) => {
+          setUser(response.data)
+        })
+      }catch(error){
+>>>>>>> 07c4df8d610243d67a12eb658e6bcb332ec4331f
         console.error('Error fetching profile data:', error)
       }
     }
@@ -116,10 +127,98 @@ export default function Profile() {
     return <div className="flex items-center justify-center h-screen">Loading...</div>
   }
 
+<<<<<<< HEAD
   const totalTasks = tasks.length
   const completedTasksPercentage = (metrics?.tasksCompleted || 0) / totalTasks * 100
   const inProgressTasksPercentage = (metrics?.tasksInProgress || 0) / totalTasks * 100
   const pendingTasksPercentage = (metrics?.tasksPending || 0) / totalTasks * 100
+=======
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="mb-6 text-3xl font-bold">My Profile</h1>
+      
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center space-x-4">
+              <Avatar className="h-20 w-20">
+                <CircleUserRound  className="h-16 w-16 mr-2 "/>
+              </Avatar>
+              <div>
+                <CardTitle className='text-black'>{user.name}</CardTitle>
+                <CardDescription>{user.email}</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {!isEditing ? (
+              <>
+                
+                {user.jobTitle && (
+                  <div className="mb-4">
+                    <Label>Job Title</Label>
+                    <p>{user.jobTitle}</p>
+                  </div>
+                )}
+                {user.bio && (
+                  <div className="mb-4">
+                    <Label>Bio</Label>
+                    <p>{user.bio}</p>
+                  </div>
+                )}
+                {user.skills && (
+                  <div className="mb-4">
+                    <Label>Skills</Label>
+                    <p>{user.skills.join(', ')}</p>
+                  </div>
+                )}
+                {user.socialLinks && (
+                  <div className="flex space-x-2">
+                    {user.socialLinks.twitter && (
+                      <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer">
+                        <Icons.twitter className="h-6 w-6" />
+                      </a>
+                    )}
+                   
+                  </div>
+                )}
+              </>
+            ) : (
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Name</Label>
+                  <Input id="name" {...register('name')} />
+                  {errors.name && <p className="text-sm text-red-500">{errors.name.message}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input id="email" {...register('email')} />
+                  {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="jobTitle">Job Title</Label>
+                  <Input id="jobTitle" {...register('jobTitle')} />
+                </div>
+                <div>
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea id="bio" {...register('bio')} />
+                  {errors.bio && <p className="text-sm text-red-500">{errors.bio.message}</p>}
+                </div>
+                <div>
+                  <Label htmlFor="skills">Skills (comma-separated)</Label>
+                  <Input id="skills" {...register('skills')} />
+                </div>
+                <Button type="submit">Save Changes</Button>
+              </form>
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button onClick={() => setIsEditing(!isEditing)}>
+              {isEditing ? 'Cancel' : 'Edit Profile'}
+            </Button>
+          </CardFooter>
+        </Card>
+>>>>>>> 07c4df8d610243d67a12eb658e6bcb332ec4331f
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">

@@ -1,3 +1,4 @@
+
 import { authOptions } from "@/lib/auth/config"
 import prisma from "@/lib/db"
 import { createChannelSchema } from "@/lib/validations/channel"
@@ -106,3 +107,4 @@ export async function GET(req: Request) {
       )
     }
   }
+
