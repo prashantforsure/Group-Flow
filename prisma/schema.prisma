@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,49 +6,44 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id                    String               @id @default(cuid())
-  email                 String               @unique
-  name                  String?
-  password              String?    
-  emailVerified     DateTime?   
-  image             String?      
-  verificationToken String?   @unique
-  resetToken        String?   @unique
+  id                String            @id @default(cuid())
+  email             String            @unique
+  name              String?
+  password          String?
+  avatar            String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  isVerified        Boolean           @default(false)
+  lastLogin         DateTime?
+  twoFactorEnabled  Boolean           @default(false)
+  workHoursPerWeek  Int?              @default(40)
+  timezone          String?
+  emailVerified     DateTime?
+  image             String?
+  resetToken        String?           @unique
   resetTokenExpiry  DateTime?
-  avatar                String?
-  role              String    @default("USER")
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
-  isVerified            Boolean              @default(false)
-  lastLogin             DateTime?
-  twoFactorEnabled      Boolean              @default(false)
-  workHoursPerWeek      Int?                 @default(40)
-  timezone              String?
-  sentInvitations GroupInvitation[]
-  
+  verificationToken String?           @unique
+  role              String            @default("USER")
   accounts          Account[]
+  activityLogs      ActivityLog[]
+  comments          Comment[]
+  ownedGroups       Group[]           @relation("GroupOwner")
+  sentInvitations   GroupInvitation[]
+  memberGroups      GroupMember[]
+  receivedMessages  Message[]         @relation("MessageReceiver")
+  messages          Message[]         @relation("MessageSender")
+  notifications     Notification[]
   sessions          Session[]
-  ownedGroups          Group[]              @relation("GroupOwner")
-  memberGroups         GroupMember[]
-  createdTasks         Task[]               @relation("TaskCreator")
-  assignedTasks        TaskAssignment[]
-  comments             Comment[]
-  notifications        Notification[]
-  timeEntries          TimeEntry[]
-  activityLogs         ActivityLog[]
-  messages             Message[]            @relation("MessageSender")
-  receivedMessages     Message[]            @relation("MessageReceiver")
-  reviews              TaskReview[]         @relation("ReviewCreator")
-  tasksToReview        TaskReview[]         @relation("ReviewAssignee")
-  achievements         UserAchievement[]
+  createdTasks      Task[]            @relation("TaskCreator")
+  assignedTasks     TaskAssignment[]
+  tasksToReview     TaskReview[]      @relation("ReviewAssignee")
+  reviews           TaskReview[]      @relation("ReviewCreator")
+  timeEntries       TimeEntry[]
+  achievements      UserAchievement[]
 }
 
-enum UserRole {
-  ADMIN
-  USER
-  CLIENT
-}
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
@@ -69,39 +58,257 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
 
 model Group {
-  id                    String               @id @default(cuid())
-  name                  String
-  description          String?
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  isArchived           Boolean              @default(false)
-  visibility           GroupVisibility?     
-  maxMembers           Int                  @default(50)
-  settings             Json?               
-  owner                User                 @relation("GroupOwner", fields: [ownerId], references: [id])
-  ownerId              String
+  id          String            @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  isArchived  Boolean           @default(false)
+  visibility  GroupVisibility?
+  maxMembers  Int               @default(50)
+  settings    Json?
+  ownerId     String
+  channels    Channel[]
+  documents   Document[]
+  events      Event[]
+  owner       User              @relation("GroupOwner", fields: [ownerId], references: [id])
   invitations GroupInvitation[]
-  members              GroupMember[]
-  tasks                Task[]
-  channels             Channel[]
-  documents            Document[]
-  events               Event[]
+  members     GroupMember[]
+  tasks       Task[]
 }
 
+model GroupMember {
+  id          String    @id @default(cuid())
+  groupId     String
+  userId      String
+  role        GroupRole @default(MEMBER)
+  joinedAt    DateTime  @default(now())
+  permissions Json?
+  group       Group     @relation(fields: [groupId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+
+  @@unique([groupId, userId])
+}
+
+model Task {
+  id             String           @id @default(cuid())
+  title          String
+  description    String?
+  status         TaskStatus       @default(PENDING)
+  priority       TaskPriority     @default(MEDIUM)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  startDate      DateTime?
+  dueDate        DateTime?
+  completedAt    DateTime?
+  estimatedHours Float?
+  actualHours    Float?
+  tags           String[]
+  groupId        String
+  parentId       String?
+  creatorId      String
+  checklist      ChecklistItem[]
+  comments       Comment[]
+  creator        User             @relation("TaskCreator", fields: [creatorId], references: [id])
+  group          Group            @relation(fields: [groupId], references: [id])
+  parent         Task?            @relation("SubTasks", fields: [parentId], references: [id])
+  subtasks       Task[]           @relation("SubTasks")
+  assignments    TaskAssignment[]
+  dependencies   TaskDependency[] @relation("DependentTask")
+  dependentOn    TaskDependency[] @relation("RequiredTask")
+  reviews        TaskReview[]
+  timeEntries    TimeEntry[]
+  attachments    Attachment[]     @relation("AttachmentToTask")
+}
+
+model TaskAssignment {
+  id         String         @id @default(cuid())
+  taskId     String
+  assigneeId String
+  assignedAt DateTime       @default(now())
+  role       AssignmentRole @default(RESPONSIBLE)
+  assignee   User           @relation(fields: [assigneeId], references: [id])
+  task       Task           @relation(fields: [taskId], references: [id])
+
+  @@unique([taskId, assigneeId])
+}
+
+model TaskDependency {
+  id              String         @id @default(cuid())
+  dependentTaskId String
+  requiredTaskId  String
+  type            DependencyType @default(FINISH_TO_START)
+  dependentTask   Task           @relation("DependentTask", fields: [dependentTaskId], references: [id])
+  requiredTask    Task           @relation("RequiredTask", fields: [requiredTaskId], references: [id])
+
+  @@unique([dependentTaskId, requiredTaskId])
+}
+
+model Comment {
+  id          String       @id @default(cuid())
+  content     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  isEdited    Boolean      @default(false)
+  taskId      String
+  authorId    String
+  author      User         @relation(fields: [authorId], references: [id])
+  task        Task         @relation(fields: [taskId], references: [id])
+  attachments Attachment[] @relation("AttachmentToComment")
+}
+
+model Message {
+  id          String       @id @default(cuid())
+  content     String
+  createdAt   DateTime     @default(now())
+  readAt      DateTime?
+  senderId    String
+  receiverId  String
+  receiver    User         @relation("MessageReceiver", fields: [receiverId], references: [id])
+  sender      User         @relation("MessageSender", fields: [senderId], references: [id])
+  attachments Attachment[] @relation("AttachmentToMessage")
+}
+
+model Document {
+  id          String       @id @default(cuid())
+  title       String
+  content     String
+  version     Int          @default(1)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  groupId     String
+  group       Group        @relation(fields: [groupId], references: [id])
+  attachments Attachment[] @relation("AttachmentToDocument")
+}
+
+model TimeEntry {
+  id          String    @id @default(cuid())
+  startTime   DateTime
+  endTime     DateTime?
+  description String?
+  userId      String
+  taskId      String
+  task        Task      @relation(fields: [taskId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model TaskReview {
+  id          String       @id @default(cuid())
+  status      ReviewStatus @default(PENDING)
+  feedback    String?
+  createdAt   DateTime     @default(now())
+  completedAt DateTime?
+  taskId      String
+  reviewerId  String
+  assigneeId  String
+  assignee    User         @relation("ReviewAssignee", fields: [assigneeId], references: [id])
+  reviewer    User         @relation("ReviewCreator", fields: [reviewerId], references: [id])
+  task        Task         @relation(fields: [taskId], references: [id])
+}
+
+model Channel {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  type        ChannelType @default(GENERAL)
+  groupId     String
+  group       Group       @relation(fields: [groupId], references: [id])
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  isVirtual   Boolean  @default(false)
+  meetingLink String?
+  groupId     String
+  group       Group    @relation(fields: [groupId], references: [id])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  content   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+}
+
+model Attachment {
+  id         String     @id @default(cuid())
+  filename   String
+  fileType   String
+  fileSize   Int
+  url        String
+  uploadedAt DateTime   @default(now())
+  comments   Comment[]  @relation("AttachmentToComment")
+  documents  Document[] @relation("AttachmentToDocument")
+  messages   Message[]  @relation("AttachmentToMessage")
+  tasks      Task[]     @relation("AttachmentToTask")
+}
+
+model ChecklistItem {
+  id          String  @id @default(cuid())
+  content     String
+  isCompleted Boolean @default(false)
+  order       Int
+  taskId      String
+  task        Task    @relation(fields: [taskId], references: [id])
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  action    String
+  details   Json?
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model UserAchievement {
+  id              String          @id @default(cuid())
+  achievementType AchievementType
+  awardedAt       DateTime        @default(now())
+  userId          String
+  user            User            @relation(fields: [userId], references: [id])
+}
+
+model GroupInvitation {
+  id        String       @id @default(cuid())
+  email     String
+  role      GroupRole    @default(MEMBER)
+  status    InviteStatus @default(PENDING)
+  message   String?
+  groupId   String
+  inviterId String
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  group     Group        @relation(fields: [groupId], references: [id])
+  inviter   User         @relation(fields: [inviterId], references: [id])
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  CLIENT
+}
 
 enum GroupVisibility {
   PUBLIC
@@ -109,54 +316,11 @@ enum GroupVisibility {
   ORGANIZATION
 }
 
-model GroupMember {
-  id                    String               @id @default(cuid())
-  group                Group                @relation(fields: [groupId], references: [id])
-  groupId              String
-  user                 User                 @relation(fields: [userId], references: [id])
-  userId               String
-  role                 GroupRole            @default(MEMBER)
-  joinedAt             DateTime             @default(now())
-  permissions          Json?              
-  
-  @@unique([groupId, userId])
-}
-
 enum GroupRole {
   ADMIN
   MODERATOR
   MEMBER
   GUEST
-}
-model Task {
-  id                    String               @id @default(cuid())
-  title                String
-  description          String?
-  status               TaskStatus           @default(PENDING)
-  priority             TaskPriority         @default(MEDIUM)
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  startDate            DateTime?
-  dueDate              DateTime?
-  completedAt          DateTime?
-  estimatedHours       Float?
-  actualHours          Float?
-  tags                 String[]
-  attachments          Attachment[]
-  group                Group                @relation(fields: [groupId], references: [id])
-  groupId              String
-  parent               Task?                @relation("SubTasks", fields: [parentId], references: [id])
-  parentId             String?
-  subtasks             Task[]               @relation("SubTasks")
-  creator              User                 @relation("TaskCreator", fields: [creatorId], references: [id])
-  creatorId            String
-  assignments          TaskAssignment[]
-  dependencies         TaskDependency[]     @relation("DependentTask")
-  dependentOn          TaskDependency[]     @relation("RequiredTask")
-  comments             Comment[]
-  timeEntries          TimeEntry[]
-  reviews              TaskReview[]
-  checklist            ChecklistItem[]
 }
 
 enum TaskStatus {
@@ -175,18 +339,6 @@ enum TaskPriority {
   URGENT
 }
 
-model TaskAssignment {
-  id                    String               @id @default(cuid())
-  task                 Task                 @relation(fields: [taskId], references: [id])
-  taskId               String
-  assignee             User                 @relation(fields: [assigneeId], references: [id])
-  assigneeId           String
-  assignedAt           DateTime             @default(now())
-  role                 AssignmentRole       @default(RESPONSIBLE)
-  
-  @@unique([taskId, assigneeId])
-}
-
 enum AssignmentRole {
   RESPONSIBLE
   ACCOUNTABLE
@@ -194,84 +346,11 @@ enum AssignmentRole {
   INFORMED
 }
 
-model TaskDependency {
-  id                    String               @id @default(cuid())
-  dependentTask        Task                 @relation("DependentTask", fields: [dependentTaskId], references: [id])
-  dependentTaskId      String
-  requiredTask         Task                 @relation("RequiredTask", fields: [requiredTaskId], references: [id])
-  requiredTaskId       String
-  type                 DependencyType       @default(FINISH_TO_START)
-  
-  @@unique([dependentTaskId, requiredTaskId])
-}
-
 enum DependencyType {
   FINISH_TO_START
   START_TO_START
   FINISH_TO_FINISH
   START_TO_FINISH
-}
-model Comment {
-  id                    String               @id @default(cuid())
-  content              String
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  isEdited             Boolean              @default(false)
-  task                 Task                 @relation(fields: [taskId], references: [id])
-  taskId               String
-  author               User                 @relation(fields: [authorId], references: [id])
-  authorId             String
-  attachments          Attachment[]
-}
-
-model Message {
-  id                    String               @id @default(cuid())
-  content              String
-  createdAt            DateTime             @default(now())
-  readAt               DateTime?
-  sender               User                 @relation("MessageSender", fields: [senderId], references: [id])
-  senderId             String
-  receiver             User                 @relation("MessageReceiver", fields: [receiverId], references: [id])
-  receiverId           String
-  attachments          Attachment[]
-}
-
-model Document {
-  id                    String               @id @default(cuid())
-  title                String
-  content              String
-  version              Int                  @default(1)
-  createdAt            DateTime             @default(now())
-  updatedAt            DateTime             @updatedAt
-  group                Group                @relation(fields: [groupId], references: [id])
-  groupId              String
-  attachments          Attachment[]
-}
-
-model TimeEntry {
-  id                    String               @id @default(cuid())
-  startTime            DateTime
-  endTime              DateTime?
-  description          String?
-  user                 User                 @relation(fields: [userId], references: [id])
-  userId               String
-  task                 Task                 @relation(fields: [taskId], references: [id])
-  taskId               String
-}
-
-
-model TaskReview {
-  id                    String               @id @default(cuid())
-  status               ReviewStatus         @default(PENDING)
-  feedback             String?
-  createdAt            DateTime             @default(now())
-  completedAt          DateTime?
-  task                 Task                 @relation(fields: [taskId], references: [id])
-  taskId               String
-  reviewer             User                 @relation("ReviewCreator", fields: [reviewerId], references: [id])
-  reviewerId           String
-  assignee             User                 @relation("ReviewAssignee", fields: [assigneeId], references: [id])
-  assigneeId           String
 }
 
 enum ReviewStatus {
@@ -281,45 +360,11 @@ enum ReviewStatus {
   CHANGES_REQUESTED
 }
 
-
-model Channel {
-  id                    String               @id @default(cuid())
-  name                 String
-  description          String?
-  type                 ChannelType          @default(GENERAL)
-  group                Group                @relation(fields: [groupId], references: [id])
-  groupId              String
-   
-}
-
 enum ChannelType {
   GENERAL
   ANNOUNCEMENTS
   TASK_UPDATES
   SOCIAL
-}
-
-model Event {
-  id                    String               @id @default(cuid())
-  title                String
-  description          String?
-  startTime            DateTime
-  endTime              DateTime
-  location             String?
-  isVirtual            Boolean              @default(false)
-  meetingLink          String?
-  group                Group                @relation(fields: [groupId], references: [id])
-  groupId              String
-}
-
-model Notification {
-  id                    String               @id @default(cuid())
-  type                 NotificationType
-  content              String
-  isRead               Boolean              @default(false)
-  createdAt            DateTime             @default(now())
-  user                 User                 @relation(fields: [userId], references: [id])
-  userId               String
 }
 
 enum NotificationType {
@@ -331,65 +376,12 @@ enum NotificationType {
   MENTION
 }
 
-model Attachment {
-  id                    String               @id @default(cuid())
-  filename             String
-  fileType             String
-  fileSize             Int
-  url                  String
-  uploadedAt           DateTime             @default(now())
-  tasks                Task[]
-  comments             Comment[]
-  documents            Document[]
-  messages             Message[]
-  
-}
-
-model ChecklistItem {
-  id                    String               @id @default(cuid())
-  content              String
-  isCompleted          Boolean              @default(false)
-  order                Int
-  task                 Task                 @relation(fields: [taskId], references: [id])
-  taskId               String
-}
-
-model ActivityLog {
-  id                    String               @id @default(cuid())
-  action               String
-  details              Json?
-  createdAt            DateTime             @default(now())
-  user                 User                 @relation(fields: [userId], references: [id])
-  userId               String
-}
-
-model UserAchievement {
-  id                    String               @id @default(cuid())
-  achievementType      AchievementType
-  awardedAt            DateTime             @default(now())
-  user                 User                 @relation(fields: [userId], references: [id])
-  userId               String
-}
-
 enum AchievementType {
   TASK_MASTER
   TEAM_PLAYER
   DEADLINE_CHAMPION
   QUALITY_GURU
   PRODUCTIVITY_STAR
-}
-model GroupInvitation {
-  id                    String               @id @default(cuid())
-  email                 String
-  role                  GroupRole            @default(MEMBER)
-  status                InviteStatus         @default(PENDING)
-  message               String?
-  group                 Group                @relation(fields: [groupId], references: [id])
-  groupId               String
-  inviter               User                 @relation(fields: [inviterId], references: [id])
-  inviterId             String
-  createdAt             DateTime             @default(now())
-  updatedAt             DateTime             @updatedAt
 }
 
 enum InviteStatus {
