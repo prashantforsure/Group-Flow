@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { Icons } from "@/components/ui/icons"
 import { CircleUserRound, Briefcase, MapPin, Calendar, Mail, Phone } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
@@ -84,7 +83,6 @@ export default function Profile() {
         setUser(userResponse.data)
         setTasks(tasksResponse.data)
         
-        // Calculate metrics
         const completedTasks = tasksResponse.data.filter((task: Task) => task.status === 'COMPLETED')
         const inProgressTasks = tasksResponse.data.filter((task: Task) => task.status === 'IN_PROGRESS')
         const pendingTasks = tasksResponse.data.filter((task: Task) => task.status === 'PENDING')
@@ -93,7 +91,7 @@ export default function Profile() {
           tasksCompleted: completedTasks.length,
           tasksInProgress: inProgressTasks.length,
           tasksPending: pendingTasks.length,
-          averageReviewScore: 4.5 // This should be fetched from the backend in a real scenario
+          averageReviewScore: 4.5 
         })
       } catch(error) {
         console.error('Error fetching profile data:', error)
@@ -135,7 +133,7 @@ export default function Profile() {
                   <CircleUserRound className="h-20 w-20 text-gray-400" />
                 </AvatarFallback>
               )}
-            </Avatar>
+            </Avatar> 
             <div className="mt-16">
               <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
               <p className="text-gray-600">{user.jobTitle}</p>

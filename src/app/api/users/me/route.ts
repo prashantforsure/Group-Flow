@@ -34,11 +34,9 @@ export async function GET(){
             return NextResponse.json({ error: "User not found" },
                  { status: 404 });
           }
-          return NextResponse.json({
+          return NextResponse.json(
             user
-          }, {
-            status: 200
-          })
+          )
     }catch(error){
         console.log(error)
         return NextResponse.json({
