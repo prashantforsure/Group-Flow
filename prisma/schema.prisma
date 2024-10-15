@@ -25,15 +25,15 @@ model User {
   resetToken        String?           @unique
   resetTokenExpiry  DateTime?
   verificationToken String?           @unique
-  role              String            @default("USER")
+  role              UserRole          @default(USER)
   accounts          Account[]
   activityLogs      ActivityLog[]
   comments          Comment[]
   ownedGroups       Group[]           @relation("GroupOwner")
   sentInvitations   GroupInvitation[]
-  memberGroups      GroupMember[]
+  groupMemberships  GroupMember[]
+  sentMessages      Message[]         @relation("MessageSender")
   receivedMessages  Message[]         @relation("MessageReceiver")
-  messages          Message[]         @relation("MessageSender")
   notifications     Notification[]
   sessions          Session[]
   createdTasks      Task[]            @relation("TaskCreator")
@@ -177,8 +177,10 @@ model Message {
   readAt      DateTime?
   senderId    String
   receiverId  String
-  receiver    User         @relation("MessageReceiver", fields: [receiverId], references: [id])
+  channelId   String
   sender      User         @relation("MessageSender", fields: [senderId], references: [id])
+  receiver    User         @relation("MessageReceiver", fields: [receiverId], references: [id])
+  channel     Channel      @relation(fields: [channelId], references: [id])
   attachments Attachment[] @relation("AttachmentToMessage")
 }
 
@@ -225,6 +227,7 @@ model Channel {
   description String?
   type        ChannelType @default(GENERAL)
   groupId     String
+  messages    Message[]
   group       Group       @relation(fields: [groupId], references: [id])
 }
 

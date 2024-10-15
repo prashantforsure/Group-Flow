@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { CircleUserRound, Briefcase, MapPin, Calendar, Mail, Phone } from 'lucide-react'
+import { CircleUserRound, Briefcase, MapPin, Calendar, Mail, Phone, Loader2 } from 'lucide-react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 
@@ -111,7 +111,7 @@ export default function Profile() {
   }
 
   if (!user) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>
+    return <div className="flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin text-[#A259FF]" /></div>
   }
 
   const totalTasks = tasks.length
@@ -214,11 +214,11 @@ export default function Profile() {
                     <p className="text-sm text-gray-600 mt-1">{metrics?.tasksPending} out of {totalTasks} tasks</p>
                   </div>
                   <div>
-                    <Label>Average Review Score</Label>
+                    {/* <Label>Average Review Score</Label>
                     <div className="flex items-center space-x-2 mt-2">
                       <Progress value={metrics?.averageReviewScore ? metrics.averageReviewScore * 20 : 0} className="w-full" />
                       <span className="text-sm font-medium">{metrics?.averageReviewScore?.toFixed(1)}/5</span>
-                    </div>
+                    </div> */}
                   </div>
                 </CardContent>
               </Card>
