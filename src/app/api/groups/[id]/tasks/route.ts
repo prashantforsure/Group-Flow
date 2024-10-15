@@ -93,8 +93,8 @@ export async function POST(
         title,
         status: 'PENDING',
         group: { connect: { id: groupId } },
-        creator: { connect: { id: assigneeId } }, // Assuming 'creator' is the correct field
-        // If there's a separate field for assignment, use it here
+        creator: { connect: { id: assigneeId } }, 
+        
       },
     });
 

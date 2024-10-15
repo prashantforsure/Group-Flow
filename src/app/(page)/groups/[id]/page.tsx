@@ -12,10 +12,10 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DatePicker } from "@/components/ui/date-picker"
 import { Plus, Settings, BarChart, CircleUser } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Link from 'next/link'
+import TaskDistributionChart from '@/components/TaskDistributionChart'
 
 type User = {
   id: string
@@ -496,25 +496,13 @@ export default function GroupDetailsPage() {
               </Card>
             </div>
             <Card>
-              <CardHeader>
-                <CardTitle>Task Distribution</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <BarChart
-                //@ts-expect-error there is sometype error
-                  data={[
-                    { name: 'Pending', value: tasks.filter(t => t.status === 'PENDING').length },
-                    { name: 'In Progress', value: tasks.filter(t => t.status === 'IN_PROGRESS').length },
-                    { name: 'Completed', value: tasks.filter(t => t.status === 'COMPLETED').length },
-                  ]}
-                  index="name"
-                  categories={['value']}
-                  colors={['#A259FF', '#1ABCFE', '#4CAF50']}
-                  valueFormatter={(value: number) => `${value} tasks`}
-                  className="mt-6 h-80"
-                />
-              </CardContent>
-            </Card>
+  <CardHeader>
+    <CardTitle>Task Distribution</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <TaskDistributionChart tasks={tasks} />
+  </CardContent>
+</Card>
           </TabsContent>
         </Tabs>
       </main>
