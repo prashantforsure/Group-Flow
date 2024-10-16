@@ -45,6 +45,7 @@ export async function GET(){
                 _count: {
                   select: {
                     tasks: true,
+                    members: true,
                   },
                 },
               },

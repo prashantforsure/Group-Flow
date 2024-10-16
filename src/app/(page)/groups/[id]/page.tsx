@@ -12,10 +12,11 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Settings, BarChart, CircleUser } from 'lucide-react'
+import { Plus, Settings,  CircleUser, ExternalLink } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import TaskDistributionChart from '@/components/TaskDistributionChart'
+import { useSession } from 'next-auth/react'
 
 type User = {
   id: string
@@ -183,9 +184,17 @@ export default function GroupDetailsPage() {
       })
     }
   }
-
-  const updateTaskStatus = async (taskId: string, status: Task['status']) => {
+  const { data: session } = useSession();
+  const updateTaskStatus = async (taskId: string, status: Task['status'], assigneeId: string) => {
     try {
+      if (session?.user?.id !== assigneeId) {
+        toast({
+          title: "Error",
+          description: "Only the assigned user can update the task status.",
+          variant: "destructive",
+        })
+        return
+      }
       await axios.put(`/api/tasks/${taskId}`, { status })
       toast({
         title: "Success",
@@ -205,7 +214,7 @@ export default function GroupDetailsPage() {
   const renderTaskList = (status: Task['status']) => {
     const filteredTasks = tasks.filter((task) => task.status === status)
     
-    return   (
+    return (
       <div key={status} className="space-y-4">
         <h3 className="text-lg font-semibold capitalize">{status.toLowerCase().replace('_', ' ')}</h3>
         {filteredTasks.length > 0 ? (
@@ -249,56 +258,30 @@ export default function GroupDetailsPage() {
                     <p>Actual: {task.actualHours || 0} hours</p>
                   </div>
                 </div>
-                <Select
-                  value={task.status}
-                  onValueChange={(value) => updateTaskStatus(task.id, value as Task['status'])}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Change status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="PENDING">Pending</SelectItem>
-                    <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                    <SelectItem value="COMPLETED">Completed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <div className="mt-4">
-                  <h5 className="font-medium mb-2">Subtasks</h5>
-                  {task.subtasks.map((subtask) => (
-                    <div key={subtask.id} className="flex items-center mb-2">
-                      <div className="w-2 h-2 bg-gray-300 rounded-full mr-2"></div>
-                      <p className="text-sm text-gray-600">{subtask.title}</p>
-                    </div>
-                  ))}
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" size="sm" className="w-full mt-2">
-                        <Plus className="h-4 w-4 mr-2" /> Add Subtask
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Add New Subtask</DialogTitle>
-                        <DialogDescription>Create a new subtask for this task.</DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <Input
-                          placeholder="Subtask title"
-                          value={newSubtask.title}
-                          onChange={(e) => setNewSubtask({ ...newSubtask, title: e.target.value })}
-                        />
-                        <Textarea
-                          placeholder="Subtask description"
-                          value={newSubtask.description}
-                          onChange={(e) => setNewSubtask({ ...newSubtask, description: e.target.value })}
-                        />
-                      </div>
-                      <DialogFooter>
-                        <Button onClick={() => addSubtask(task.id)}>Add Subtask</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
+                {session?.user?.id === task.assignments[0]?.assignee.id ? (
+                  <Select
+                    value={task.status}
+                    onValueChange={(value) => updateTaskStatus(task.id, value as Task['status'], task.assignments[0].assignee.id)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Change status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">Pending</SelectItem>
+                      <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+                      <SelectItem value="COMPLETED">Completed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <div className="text-sm text-gray-600">
+                    Status: <span className="font-semibold">{task.status}</span>
+                  </div>
+                )}
+                <Button asChild className="w-full mt-4">
+                  <Link href={`/groups/${id}/${task.id}`}>
+                    <ExternalLink className="mr-2 h-4 w-4" /> View Task Details
+                  </Link>
+                </Button>
               </CardContent>
             </Card>
           ))
@@ -306,7 +289,8 @@ export default function GroupDetailsPage() {
           <p className="text-gray-500">No tasks in this status</p>
         )}
       </div>
-    )
+    )  
+     
   }
 
   if (loading) {
@@ -322,42 +306,8 @@ export default function GroupDetailsPage() {
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
-          <div className=''>
-          <Button asChild variant="outline" className='mr-2'>
-            <Link href={`/groups/${id}/channels`}>
-              <Settings className="mr-2 h-4 w-4" />Channels
-            </Link>
-          </Button>
-          <Button asChild variant="outline">
-            <Link href={`/groups/${id}/settings`}>
-              <Settings className="mr-2 h-4 w-4" /> Group Settings
-            </Link>
-          </Button>
-
-          </div>
-          
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="tasks" className="space-y-8">
-          <TabsList className="bg-white p-1 rounded-full inline-flex shadow-sm">
-            <TabsTrigger value="tasks" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
-              Tasks
-            </TabsTrigger>
-            <TabsTrigger value="members" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
-              Members
-            </TabsTrigger>
-            <TabsTrigger value="overview" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
-              Overview
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="tasks" className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {['PENDING', 'IN_PROGRESS', 'COMPLETED'].map((status) => renderTaskList(status as Task['status']))}
-            </div>
-            <Dialog>
+          <div className='flex items-center space-x-4'>
+          <Dialog>
               <DialogTrigger asChild>
                 <Button className="bg-[#A259FF] hover:bg-[#1ABCFE] text-white transition-colors">
                   <Plus className="mr-2 h-4 w-4" /> Add Task
@@ -432,6 +382,41 @@ export default function GroupDetailsPage() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+          <Button asChild variant="outline" className='mr-2'>
+            <Link href={`/groups/${id}/channels`}>
+              <Settings className="mr-2 h-4 w-4" />Channels
+            </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href={`/groups/${id}/settings`}>
+              <Settings className="mr-2 h-4 w-4" /> Group Settings
+            </Link>
+          </Button>
+
+          </div>
+          
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8">
+        <Tabs defaultValue="tasks" className="space-y-8">
+          <TabsList className="bg-white p-1 rounded-full inline-flex shadow-sm">
+            <TabsTrigger value="tasks" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
+              Tasks
+            </TabsTrigger>
+            <TabsTrigger value="members" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
+              Members
+            </TabsTrigger>
+            <TabsTrigger value="overview" className="rounded-full px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#A259FF] focus:ring-offset-2">
+              Overview
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="tasks" className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {['PENDING', 'IN_PROGRESS', 'COMPLETED'].map((status) => renderTaskList(status as Task['status']))}
+            </div>
+            
           </TabsContent>
 
           <TabsContent value="members" className="space-y-8">
