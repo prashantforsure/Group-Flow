@@ -5,7 +5,7 @@ import { authOptions } from '@/lib/auth/config'
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { groupId: string; taskId: string } }
+  { params }: { params: { id: string; taskId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -13,7 +13,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { groupId, taskId } = params
+    const { id, taskId } = params
 
     const task = await prisma.task.findUnique({
       where: { id: taskId },
@@ -36,14 +36,12 @@ export async function GET(
 
     const groupMember = await prisma.groupMember.findFirst({
       where: {
-        groupId,
+        id,
         userId: session.user.id,
       },
     })
 
-    if (!groupMember) {
-      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
-    }
+   
 
     return NextResponse.json(task)
   } catch (error) {
@@ -54,7 +52,7 @@ export async function GET(
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { groupId: string; taskId: string } }
+  { params }: { params: { id: string; taskId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -62,7 +60,7 @@ export async function PUT(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { groupId, taskId } = params
+    const { id, taskId } = params
     const body = await req.json()
 
     const task = await prisma.task.findUnique({
@@ -82,7 +80,7 @@ export async function PUT(
 
     const isAdmin = await prisma.groupMember.findFirst({
       where: {
-        groupId,
+        id,
         userId: session.user.id,
         role: 'ADMIN',
       },
@@ -108,7 +106,7 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { groupId: string; taskId: string } }
+  { params }: { params: { id: string; taskId: string } }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -116,11 +114,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { groupId, taskId } = params
+    const { id, taskId } = params
 
     const isAdmin = await prisma.groupMember.findFirst({
       where: {
-        groupId,
+        id,
         userId: session.user.id,
         role: 'ADMIN',
       },

@@ -4,7 +4,12 @@ import React from 'react'
 import { Button } from './ui/button'
 import { authOptions } from '@/lib/auth/config'
 import { UserAccountNav } from './UserAccountNav'
-import { Sparkles, PlusCircle } from 'lucide-react'
+import { PlusCircle, Menu } from 'lucide-react'
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 
 const Navbar = async () => {
   const session = await getServerSession(authOptions)
@@ -29,29 +34,59 @@ const Navbar = async () => {
           </svg>
           <span className="font-bold text-xl">GroupFlow</span>
         </Link>
-        <nav className="hidden md:flex space-x-8">
-         
-        </nav>
+        
         <div className='flex items-center gap-4'>
           {session?.user ? (
             <>
-              <Link href='/dashboard'>
-                <Button 
-                  variant="ghost" 
-                  className='rounded-full px-6 py-2 text-sm hover:text-[#A259FF] transition-colors text-black border border-slate-900'
-                >
-                  Dashboard
-                </Button>
-              </Link>
-              <Link href='/groups'>
-                <Button 
-                  variant="ghost" 
-                  className='rounded-full px-6 py-2 text-sm hover:text-[#1ABCFE] transition-colors text-black border border-slate-900 flex items-center gap-2'
-                >
-                  <PlusCircle className="h-4 w-4" />
-                  Create Group
-                </Button>
-              </Link>
+              <div className="hidden md:flex items-center gap-4">
+                <Link href='/dashboard'>
+                  <Button 
+                    variant="ghost" 
+                    className='rounded-full px-6 py-2 text-sm hover:text-[#A259FF] transition-colors text-black border border-slate-900'
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+                <Link href='/groups'>
+                  <Button 
+                    variant="ghost" 
+                    className='rounded-full px-6 py-2 text-sm hover:text-[#1ABCFE] transition-colors text-black border border-slate-900 flex items-center gap-2'
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    Create Group
+                  </Button>
+                </Link>
+              </div>
+              <div className="md:hidden hidden">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                    <nav className="flex flex-col gap-4">
+                      <Link href='/dashboard'>
+                        <Button 
+                          variant="ghost" 
+                          className='w-full justify-start rounded-full px-6 py-2 text-sm hover:text-[#A259FF] transition-colors text-black border border-slate-900'
+                        >
+                          Dashboard
+                        </Button>
+                      </Link>
+                      <Link href='/groups'>
+                        <Button 
+                          variant="ghost" 
+                          className='w-full justify-start rounded-full px-6 py-2 text-sm hover:text-[#1ABCFE] transition-colors text-black border border-slate-900 flex items-center gap-2'
+                        >
+                          <PlusCircle className="h-4 w-4" />
+                          Create Group
+                        </Button>
+                      </Link>
+                    </nav>
+                  </SheetContent>
+                </Sheet>
+              </div>
               <UserAccountNav user={{
                 ...session.user,
                 image: session.user.image ?? "",
