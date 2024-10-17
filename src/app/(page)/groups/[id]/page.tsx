@@ -12,7 +12,7 @@ import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Settings,  CircleUser, ExternalLink } from 'lucide-react'
+import { Plus, Settings,  CircleUser, ExternalLink, Loader2 } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import Link from 'next/link'
 import TaskDistributionChart from '@/components/TaskDistributionChart'
@@ -294,7 +294,7 @@ export default function GroupDetailsPage() {
   }
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>
+    return <div className="flex items-center justify-center h-screen"><Loader2 className="h-8 w-8 animate-spin text-[#A259FF]" /></div>
   }
 
   if (!group) {
