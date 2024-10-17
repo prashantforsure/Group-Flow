@@ -25,7 +25,7 @@ export async function PUT(
 }
 
 export async function DELETE(
-  
+  req: NextRequest,
   { params }: { params: { id: string, subtaskId: string } }
 ) {
   const session = await getServerSession();

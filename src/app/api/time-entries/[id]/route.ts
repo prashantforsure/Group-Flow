@@ -2,7 +2,7 @@ import { authOptions } from "@/lib/auth/config"
 import prisma from "@/lib/db"
 import { updateTimeEntrySchema } from "@/lib/validations/timeEntry"
 import { getServerSession } from "next-auth"
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 
 export async function PUT(
     req: Request,
@@ -100,7 +100,7 @@ export async function PUT(
   }
   
   export async function DELETE(
-   
+    req: NextRequest,
     { params }: { params: { id: string } }
   ) {
     try {

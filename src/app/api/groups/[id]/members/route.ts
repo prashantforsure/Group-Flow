@@ -4,66 +4,69 @@ import { updateMemberRoleSchema } from "@/lib/validations/group";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req: NextRequest, { params }: { params : { id : string } } ){
- try{
+export async function GET(
+  req: NextRequest, 
+  { params }: { params: { id: string } }
+) {
+  try {
     const session = await getServerSession(authOptions);
-    if(!session?.user?.email){
-        return NextResponse.json({
-            message: "unathenticated"
-        }, {
-            status: 401
-        })
+    if (!session?.user?.email) {
+      return NextResponse.json({
+        message: "unauthenticated"
+      }, {
+        status: 401
+      });
     }
-    const { searchParams } = new URL(req.url)
+
+    const { searchParams } = new URL(req.url);
     const role = searchParams.get('role');
     const search = searchParams.get('search');
-    
-    const whereClause = {
-        groupId: params.id,
-      };
-  
+
+    const whereClause: any = {
+      groupId: params.id,
+    };
+
     if (role) {
-      //@ts-expect-error This is expected to fail because the function is not defined in the current scope
-        whereClause.role = role;
-      }
+      whereClause.role = role;
+    }
 
     if (search) {
-      //@ts-expect-error This is expected to fail because the function is not defined in the current scope
-        whereClause.user = {
-          OR: [
-            { name: { contains: search, mode: 'insensitive' } },
-            { email: { contains: search, mode: 'insensitive' } },
-          ],
-        };
-      }
+      whereClause.user = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { email: { contains: search, mode: 'insensitive' } },
+        ],
+      };
+    }
+
     const members = await prisma.groupMember.findMany({
-        where : whereClause,
-        include: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true
-              },
-            },
+      where: whereClause,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true
+          },
         },
-        orderBy: {
-            joinedAt: 'desc',
-        }
-    })
+      },
+      orderBy: {
+        joinedAt: 'desc',
+      }
+    });
     return NextResponse.json(members);
- }catch(error){
-  console.error("Error adding member:", error);
+  } catch (error) {
+    console.error("Error fetching members:", error);
     return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 }
-      );
- }
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -90,44 +93,62 @@ export async function POST(
   }
 }
 
-export async function DELETE( { params } : { params : { userId : string, id: string } } ){
-  try{
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
     const session = await getServerSession(authOptions);
-    if(!session?.user?.email){
+    if (!session?.user?.email) {
       return NextResponse.json({
-          message: "unathenticated"
+        message: "unauthenticated"
       }, {
-          status: 401
-      })
-  }
-  const currentMember = await prisma.groupMember.findFirst({
-    where: {
-      groupId: params.id,
-      user: { email: session.user.email },
-      role: { in: ['ADMIN', 'MODERATOR'] },
+        status: 401
+      });
     }
-  })
-  if(!currentMember){
-    return NextResponse.json({
-      message : ' user does not have permission to remove'
-    }, {
-      status: 403
-    })
-  }
-  await prisma.groupMember.delete({
-    where: {
-      groupId_userId: {
+
+    const searchParams = new URL(request.url).searchParams;
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json({
+        message: "userId is required"
+      }, {
+        status: 400
+      });
+    }
+
+    const currentMember = await prisma.groupMember.findFirst({
+      where: {
         groupId: params.id,
-        userId: params.userId,
+        user: { email: session.user.email },
+        role: { in: ['ADMIN', 'MODERATOR'] },
+      }
+    });
+
+    if (!currentMember) {
+      return NextResponse.json({
+        message: 'user does not have permission to remove'
+      }, {
+        status: 403
+      });
+    }
+
+    await prisma.groupMember.delete({
+      where: {
+        groupId_userId: {
+          groupId: params.id,
+          userId: userId,
+        },
       },
-    },
-  })
-  return NextResponse.json(
-    { message: "Member removed successfully" },
-    { status: 200 }
-  );
-  }catch(error){
-    console.error("Error adding member:", error);
+    });
+
+    return NextResponse.json(
+      { message: "Member removed successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error removing member:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -135,36 +156,54 @@ export async function DELETE( { params } : { params : { userId : string, id: str
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string; userId: string } } ){
-  try{
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
     const session = await getServerSession(authOptions);
-    if(!session?.user?.email){
+    if (!session?.user?.email) {
       return NextResponse.json({
-        message: " unauthorized"
+        message: "unauthorized"
       }, {
         status: 401
-      })
+      });
     }
+
+    const searchParams = new URL(req.url).searchParams;
+    const userId = searchParams.get('userId');
+
+    if (!userId) {
+      return NextResponse.json({
+        message: "userId is required"
+      }, {
+        status: 400
+      });
+    }
+
     const body = await req.json();
-    const validatedData =  updateMemberRoleSchema.parse(body);
+    const validatedData = updateMemberRoleSchema.parse(body);
+
     const currentMember = await prisma.groupMember.findFirst({
       where: {
         groupId: params.id,
         user: { email: session.user.email },
         role: 'ADMIN'
       }
-    })
+    });
+
     if (!currentMember) {
       return NextResponse.json(
         { error: "Only admins can update member roles" },
         { status: 403 }
       );
     }
+
     const updatedMember = await prisma.groupMember.update({
       where: {
         groupId_userId: {
           groupId: params.id,
-          userId: params.userId,
+          userId: userId,
         },
       },
       data: {
@@ -183,12 +222,11 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string; 
     });
 
     return NextResponse.json(updatedMember);
-  }catch(error){
-    console.error("Error adding member:", error);
+  } catch (error) {
+    console.error("Error updating member:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
     );
   }
-
 }
