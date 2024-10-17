@@ -382,14 +382,14 @@ export default function GroupDetailsPage() {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          <Button asChild variant="outline" className='mr-2'>
+          {/* <Button asChild variant="outline" className='mr-2'>
             <Link href={`/groups/${id}/channels`}>
               <Settings className="mr-2 h-4 w-4" />Channels
             </Link>
-          </Button>
+          </Button> */}
           <Button asChild variant="outline">
             <Link href={`/groups/${id}/settings`}>
-              <Settings className="mr-2 h-4 w-4" /> Group Settings
+              <Settings className="mr-2 h-4 w-4" />Settings
             </Link>
           </Button>
 
