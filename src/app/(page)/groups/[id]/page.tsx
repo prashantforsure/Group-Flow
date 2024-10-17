@@ -278,7 +278,7 @@ export default function GroupDetailsPage() {
                   </div>
                 )}
                 <Button asChild className="w-full mt-4">
-                  <Link href={`/groups/${id}/${task.id}`}>
+                  <Link href={`/groups/${id}/tasks/${task.id}`}>
                     <ExternalLink className="mr-2 h-4 w-4" /> View Task Details
                   </Link>
                 </Button>

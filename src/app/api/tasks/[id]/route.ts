@@ -4,102 +4,125 @@ import { TaskUpdateSchema } from "@/lib/validations/taskUpdate";
 import { getServerSession } from "next-auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET({ params }: { params : { id: string } } ){
-try{
-    const session = await getServerSession(authOptions)
-    if(!session?.user?.email){
-        return NextResponse.json({
-            message: "unauthorized"
-        }, {
-            status: 401
-        })
-    }
-    const task = await prisma.task.findUnique({
-        where: { id : params.id },
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { id } = params
+
+  const task = await prisma.task.findUnique({
+    where: { id: id },
+    include: {
+      assignments: {
         include: {
-            creator: {
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    avatar: true
-                }
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
             },
-            assignments: {
-                include: {
-                    assignee: {
-                        select: {
-                          id: true,
-                          name: true,
-                          email: true,
-                          avatar: true,
-                        }
-                      }
-                      
-                }
-            },
-            group: true,
-        subtasks: true,
-        comments: {
-          include: {
-            author: {
-              select: {
-                id: true,
-                name: true,
-                email: true,
-                avatar: true,
-              }
-            }
           },
-          orderBy: { createdAt: 'desc' }
-        }
-        }
-    })
-    if(!task){
-        return NextResponse.json({
-            message: 'task does not exist'
-        }, {
-            status: 404
-        })
-    }
-    const isMember = await prisma.groupMember.findFirst({
-        where: {
-          groupId: task.groupId,
-          userId: session.user.id,
-        }
-      });
-      if(!isMember){
-        return NextResponse.json({
-            message: "no access to task"
-        }, {
-            status: 403
-        })
-      }
-     return NextResponse.json(task)
-}catch(error){
-  console.log(error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
-}
+        },
+      },
+      subtasks: true,
+      group: {
+        include: {
+          members: {
+            where: { userId: session.user.id },
+            select: { role: true },
+          },
+        },
+      },
+    },
+  })
+
+  if (!task) {
+    return NextResponse.json({ error: 'Task not found' }, { status: 404 })
+  }
+
+  const isAdmin = task.group.members[0]?.role === 'ADMIN'
+  const isAssignee = task.assignments.some(a => a.assignee.id === session.user.id)
+
+  if (!isAdmin && !isAssignee) {
+    return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+  }
+
+  return NextResponse.json(task)
 }
 
 export async function PUT(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  try {
-    const taskId = params.id;
-    const { status } = await request.json();
-
-    const updatedTask = await prisma.task.update({
-      where: { id: taskId },
-      data: { status: status.toUpperCase() },
-    });
-
-    return NextResponse.json({ success: true, task: updatedTask });
-  } catch (error) {
-    console.error('Error updating task:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  const session = await getServerSession(authOptions)
+  if (!session?.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const { id } = params
+  const body = await req.json()
+
+  const task = await prisma.task.findUnique({
+    where: { id: id },
+    include: {
+      assignments: {
+        include: {
+          assignee: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
+      group: {
+        include: {
+          members: {
+            where: { userId: session.user.id },
+            select: { role: true },
+          },
+        },
+      },
+    },
+  })
+
+  if (!task) {
+    return NextResponse.json({ error: 'Task not found' }, { status: 404 })
+  }
+
+  const isAdmin = task.group.members[0]?.role === 'ADMIN'
+  const isAssignee = task.assignments.some(a => a.assignee.id === session.user.id)
+
+  if (!isAdmin && !isAssignee) {
+    return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+  }
+
+  const updatedTask = await prisma.task.update({
+    where: { id: id },
+    data: body,
+    include: {
+      assignments: {
+        include: {
+          assignee: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              image: true,
+            },
+          },
+        },
+      },
+      subtasks: true,
+    },
+  })
+
+  return NextResponse.json(updatedTask)
 }
 
 export async function DELETE(

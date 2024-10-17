@@ -62,16 +62,16 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/settings" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+          <Link href="/taskmanager" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
             <Settings className="h-5 w-5 text-[#A259FF]" />
-            <span className="text-sm font-medium text-gray-700">Settings</span>
+            <span className="text-sm font-medium text-gray-700">Task Manager</span>
           </Link>
         </DropdownMenuItem>
 
         <DropdownMenuItem asChild>
-          <Link href="/guideline" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+          <Link href="/settings" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
             <Settings className="h-5 w-5 text-[#1ABCFE]" />
-            <span className="text-sm font-medium text-gray-700">Terms and Conditions</span>
+            <span className="text-sm font-medium text-gray-700">Settings</span>
           </Link>
         </DropdownMenuItem>
 
