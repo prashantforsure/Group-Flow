@@ -11,6 +11,8 @@
     "lint:fix": "eslint src/ --fix",
     "lint:types": "tsc --noEmit",
     "lint:all": "npm run lint:strict && npm run lint:types"
+  
+
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
