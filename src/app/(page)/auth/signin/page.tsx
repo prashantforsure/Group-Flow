@@ -8,14 +8,14 @@ import Link from 'next/link'
 
 export default function SignInPage() {
   return (
-    <div className="min-h-screen  flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-purple-50 to-blue-50">
+    <div className="min-h-screen  flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-purple-300 to-blue-300">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="w-full max-w-md"
       >
-        <div className="bg-[#535353] rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="px-6 py-12 sm:px-12">
             <div className="text-center">
               <motion.div
@@ -25,7 +25,7 @@ export default function SignInPage() {
               >
                 <Icons.logo className="mx-auto h-12 w-12 text-[#A259FF]" />
               </motion.div>
-              <h2 className="mt-6 text-3xl font-extrabold text-white">
+              <h2 className="mt-6 text-3xl font-extrabold text-black">
                 Sign in to GroupFlow
               </h2>
               <p className="mt-2 text-sm text-gray-400">
@@ -42,7 +42,7 @@ export default function SignInPage() {
                 <Button
                   onClick={() => signIn('google')}
                   variant="outline"
-                  className="w-full py-3 px-4 flex items-center justify-center space-x-2 border border-transparent text-sm font-medium rounded-lg text-white bg-[#4285F4] hover:bg-[#3367D6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4285F4] focus:ring-offset-gray-800 transition-all duration-200"
+                  className="w-full py-3 px-4 flex items-center justify-center space-x-2  border-transparent text-sm font-medium rounded-lg border border-slate-300   hover:bg-[#9db4e6] "
                 >
                   <Icons.google className="h-5 w-5" />
                   <span>Sign in with Google</span>
@@ -52,7 +52,7 @@ export default function SignInPage() {
               <div className="mt-6">
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-600"></div>
+                    <div className="w-full border-t border-white"></div>
                   </div>
                 
                 </div>
@@ -61,8 +61,8 @@ export default function SignInPage() {
               </div>
             </div>
           </div>
-          <div className="px-6 py-4 bg-[#252525] sm:px-10">
-            <p className="text-xs leading-5 text-gray-400">
+          <div className="px-6 py-2 bg-[#252525] sm:px-10">
+            <p className="text-xs leading-5 text-white">
               By signing in, you agree to our{' '}
               <Link href="#" className="font-medium text-[#A259FF] hover:text-[#B78AFF] transition-colors duration-200">
                 Terms of Service
@@ -74,11 +74,11 @@ export default function SignInPage() {
             </p>
           </div>
         </div>
-        <p className="mt-8 text-center text-sm text-white">
+        <p className="mt-8 text-center text-sm text-transparent">
           Don&apos;t have an account?{' '}
           <Link
-            href='/auth/register'
-            className='font-medium text-white'
+            href='/auth/signin'
+            className='font-medium text-transparent'
           >
             Sign up for free
           </Link>
