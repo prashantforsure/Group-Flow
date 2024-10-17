@@ -4,7 +4,7 @@ import { User } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { DropdownMenuContent, DropdownMenu, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuItem } from './ui/dropdown-menu'
 import Link from 'next/link'
-import { Settings, LogOut, Rss, PlusCircle } from 'lucide-react'
+import { Settings, LogOut, Rss, PlusCircle, ClipboardCheck } from 'lucide-react'
 import { UserAvatar } from './UserAvatar'
 import { motion } from 'framer-motion'
 
@@ -63,7 +63,8 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
 
         <DropdownMenuItem asChild>
           <Link href="/taskmanager" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
-            <Settings className="h-5 w-5 text-[#A259FF]" />
+            
+            <ClipboardCheck className="h-5 w-5 text-[#A259FF]" />
             <span className="text-sm font-medium text-gray-700">Task Manager</span>
           </Link>
         </DropdownMenuItem>
