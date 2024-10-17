@@ -23,6 +23,8 @@ import {
   LucideIcon
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 interface FeatureCardProps {
   icon: LucideIcon;
@@ -71,6 +73,7 @@ const AnimatedSection = ({ children }: AnimatedSectionProps) => {
       controls.start('visible')
     }
   }, [controls, inView])
+ 
 
   return (
     <motion.div
@@ -90,6 +93,15 @@ const AnimatedSection = ({ children }: AnimatedSectionProps) => {
 
 export default function HomePage() {
   const [scrollY, setScrollY] = useState(0)
+  const router = useRouter()
+  const { data: session } = useSession()
+  const handleClick = () => {
+    if (session) {
+      router.push('/groups')
+    } else {
+      router.push('/auth/signin')
+    }
+  }
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
@@ -139,16 +151,17 @@ export default function HomePage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              <Link href='groups'>
-              <Button size="lg" className="bg-purple-600 hover:bg-purple-700">
-                Get Started <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-              </Link>
+               <Button 
+      size="lg" 
+      className="bg-purple-600 hover:bg-purple-700"
+      onClick={handleClick}
+    >
+      Get Started <ArrowRight className="ml-2 h-5 w-5" />
+    </Button>
              
             </motion.div>
           </div>
 
-          {/* Animated illustration */}
           <motion.div 
             className="mt-16 relative"
             initial={{ opacity: 0, scale: 0.8 }}
