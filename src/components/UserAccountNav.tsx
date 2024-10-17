@@ -4,7 +4,7 @@ import { User } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { DropdownMenuContent, DropdownMenu, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuItem } from './ui/dropdown-menu'
 import Link from 'next/link'
-import { Settings, LogOut, Rss, PlusCircle, ClipboardCheck } from 'lucide-react'
+import { Settings, LogOut, Rss, PlusCircle, ClipboardCheck, CircleUser } from 'lucide-react'
 import { UserAvatar } from './UserAvatar'
 import { motion } from 'framer-motion'
 
@@ -46,7 +46,13 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
             </div>
           </motion.div>
         </Link>
-        
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+          <CircleUser className="h-5 w-5 text-[#A259FF]"/>
+            
+            <span className="text-sm font-medium text-gray-700">My Profile</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/dashboard" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
             <Rss className="h-5 w-5 text-[#A259FF]" />
@@ -61,20 +67,14 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
           </Link>
         </DropdownMenuItem>
 
-        <DropdownMenuItem asChild>
-          <Link href="/taskmanager" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
-            
-            <ClipboardCheck className="h-5 w-5 text-[#A259FF]" />
-            <span className="text-sm font-medium text-gray-700">Task Manager</span>
-          </Link>
-        </DropdownMenuItem>
+      
 
-        <DropdownMenuItem asChild>
+        {/* <DropdownMenuItem asChild>
           <Link href="/settings" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
             <Settings className="h-5 w-5 text-[#1ABCFE]" />
             <span className="text-sm font-medium text-gray-700">Settings</span>
           </Link>
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
 
         <DropdownMenuSeparator className="my-1 border-gray-100" />
         
