@@ -4,7 +4,7 @@ import { User } from 'next-auth'
 import { signOut } from 'next-auth/react'
 import { DropdownMenuContent, DropdownMenu, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuItem } from './ui/dropdown-menu'
 import Link from 'next/link'
-import { Settings, LogOut, Rss, PlusCircle, ClipboardCheck, CircleUser } from 'lucide-react'
+import { Settings, LogOut, Rss, PlusCircle, ClipboardCheck, CircleUser, ListTodo } from 'lucide-react'
 import { UserAvatar } from './UserAvatar'
 import { motion } from 'framer-motion'
 
@@ -55,11 +55,17 @@ export function UserAccountNav({ user }: UserAccountNavProps) {
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/dashboard" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
-            <Rss className="h-5 w-5 text-[#A259FF]" />
+            <Rss className="h-5 w-5 text-[#1ABCFE]" />
             <span className="text-sm font-medium text-gray-700">Dashboard</span>
           </Link>
         </DropdownMenuItem>
-
+        <DropdownMenuItem asChild>
+          <Link href="/tasks" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
+          <ListTodo className="h-5 w-5 text-[#A259FF]" />
+            
+            <span className="text-sm font-medium text-gray-700">Task List</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/groups" className="flex items-center gap-3 py-3 px-4 hover:bg-gray-50 transition-colors duration-200">
             <PlusCircle className="h-5 w-5 text-[#1ABCFE]" />
