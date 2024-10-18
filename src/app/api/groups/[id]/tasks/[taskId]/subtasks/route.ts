@@ -84,7 +84,7 @@ export async function POST(
     const isAdmin = parentTask.group.members[0]?.role === 'ADMIN'
     const isAssignee = parentTask.assignments.some(a => a.assignee.id === session.user.id)
 
-    if (!isAdmin || !isAssignee) {
+    if (!isAdmin && !isAssignee) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 

@@ -111,10 +111,22 @@ export async function DELETE(
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       include: {
+        group: {
+          include: {
+            members: {
+              where: { userId: session.user.id },
+              select: { role: true },
+            },
+          },
+        },
         assignments: {
           include: {
-            assignee: true
-          }
+            assignee: {
+              select: {
+                id: true,
+              },
+            },
+          },
         },
       },
     })
@@ -123,19 +135,33 @@ export async function DELETE(
       return NextResponse.json({ error: 'Task not found' }, { status: 404 })
     }
 
-    const isAssignee = task.assignments.some(assignment => assignment.assignee.id === session.user.id)
+    if (task.groupId !== id) {
+      return NextResponse.json({ error: 'Task not found in this group' }, { status: 404 })
+    }
+    const isAdmin = task.group.members[0]?.role === 'ADMIN'
+    const isAssignee = task.assignments.some(a => a.assignee.id === session.user.id)
 
-    if (!isAssignee) {
+    if (!isAdmin && !isAssignee) {
       return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    await prisma.task.delete({
-      where: { id: taskId },
+    await prisma.$transaction(async (tx) => {
+   
+      await tx.taskAssignment.deleteMany({
+        where: { taskId }
+      })
+
+      await tx.task.deleteMany({
+        where: { parentId: taskId }
+      })
+      await tx.task.delete({
+        where: { id: taskId }
+      })
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error deleting task:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 })
   }
 }
