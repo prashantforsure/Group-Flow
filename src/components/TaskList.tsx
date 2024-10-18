@@ -257,18 +257,21 @@ export default function TaskList() {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex -space-x-2">
                               {task.assignments.map((assignment) => (
-                                <Avatar 
-                                  key={assignment.assignee.id} 
-                                  className="border-2 border-white"
-                                >
-                                  <AvatarImage 
-                                    src={assignment.assignee.avatar} 
-                                    alt={assignment.assignee.name} 
-                                  />
-                                  <AvatarFallback>
-                                    {assignment.assignee.name[0]}
-                                  </AvatarFallback>
-                                </Avatar>
+                                // <Avatar 
+                                //   key={assignment.assignee.id} 
+                                //   className="border-2 border-white"
+                                // >
+                                //   <AvatarImage 
+                                //     src={assignment.assignee.avatar} 
+                                //     alt={assignment.assignee.name} 
+                                //   />
+                                //   <AvatarFallback>
+                                //     {assignment.assignee.name}
+                                //   </AvatarFallback>
+                                // </Avatar>
+                                <Badge className="text-sm text-zinc-800 font-semibold px-2.5 py-0.5 rounded hover:bg-sky-100 bg-white ">
+                              {assignment.assignee.name}
+                            </Badge>
                               ))}
                             </div>
                           </td>
