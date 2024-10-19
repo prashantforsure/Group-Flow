@@ -34,6 +34,11 @@ model User {
   groupMemberships  GroupMember[]
   sentMessages      Message[]         @relation("MessageSender")
   receivedMessages  Message[]         @relation("MessageReceiver")
+
+  mentionedIn     Message[]      @relation("MessageMentions")
+  reactions       Reaction[]
+  announcements   Announcement[]
+
   notifications     Notification[]
   sessions          Session[]
   createdTasks      Task[]            @relation("TaskCreator")
@@ -82,6 +87,8 @@ model Group {
   settings    Json?
   ownerId     String
   channels    Channel[]
+
+  announcements Announcement[]
   documents   Document[]
   events      Event[]
   owner       User              @relation("GroupOwner", fields: [ownerId], references: [id])
@@ -174,16 +181,33 @@ model Message {
   id          String       @id @default(cuid())
   content     String
   createdAt   DateTime     @default(now())
-  readAt      DateTime?
+  updatedAt   DateTime     @updatedAt
   senderId    String
-  receiverId  String
   channelId   String
+  parentId    String?      // For threaded messages
+  mentions    User[]       @relation("MessageMentions")
+  reactions   Reaction[]
   sender      User         @relation("MessageSender", fields: [senderId], references: [id])
   receiver    User         @relation("MessageReceiver", fields: [receiverId], references: [id])
+  receiverId  String
   channel     Channel      @relation(fields: [channelId], references: [id])
+  parent      Message?     @relation("ThreadedMessages", fields: [parentId], references: [id])
+  replies     Message[]    @relation("ThreadedMessages")
   attachments Attachment[] @relation("AttachmentToMessage")
+  notifications Notification[]
 }
 
+model Reaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  createdAt DateTime @default(now())
+  userId    String
+  messageId String
+  user      User     @relation(fields: [userId], references: [id])
+  message   Message  @relation(fields: [messageId], references: [id])
+
+  @@unique([userId, messageId, emoji])
+}
 model Document {
   id          String       @id @default(cuid())
   title       String
@@ -227,9 +251,12 @@ model Channel {
   description String?
   type        ChannelType @default(GENERAL)
   groupId     String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   messages    Message[]
   group       Group       @relation(fields: [groupId], references: [id])
 }
+
 
 model Event {
   id          String   @id @default(cuid())
@@ -251,8 +278,11 @@ model Notification {
   isRead    Boolean          @default(false)
   createdAt DateTime         @default(now())
   userId    String
+  messageId String?          // Optional, for message-related notifications
   user      User             @relation(fields: [userId], references: [id])
+  message   Message?         @relation(fields: [messageId], references: [id])
 }
+
 
 model Attachment {
   id         String     @id @default(cuid())
@@ -305,6 +335,17 @@ model GroupInvitation {
   updatedAt DateTime     @updatedAt
   group     Group        @relation(fields: [groupId], references: [id])
   inviter   User         @relation(fields: [inviterId], references: [id])
+}
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  groupId   String
+  authorId  String
+  group     Group    @relation(fields: [groupId], references: [id])
+  author    User     @relation(fields: [authorId], references: [id])
 }
 
 enum UserRole {
@@ -368,6 +409,8 @@ enum ChannelType {
   ANNOUNCEMENTS
   TASK_UPDATES
   SOCIAL
+  PROJECT
+  TEAM
 }
 
 enum NotificationType {
@@ -377,6 +420,9 @@ enum NotificationType {
   REVIEW_REQUESTED
   DEADLINE_APPROACHING
   MENTION
+  MESSAGE_RECEIVED
+  ANNOUNCEMENT_POSTED
+  REACTION_ADDED
 }
 
 enum AchievementType {
