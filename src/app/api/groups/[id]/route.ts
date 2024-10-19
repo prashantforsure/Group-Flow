@@ -6,11 +6,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { ZodError } from "zod";
 
 export async function GET(
-  request: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const groupId = params.id;
+    const session = await getServerSession(authOptions)
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const groupId = params.id
 
     const group = await prisma.group.findUnique({
       where: { id: groupId },
@@ -22,41 +27,63 @@ export async function GET(
                 id: true,
                 name: true,
                 email: true,
-                
+                avatar: true,
               },
             },
           },
         },
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            avatar: true,
+          },
+        },
       },
-    });
+    })
 
     if (!group) {
-      return NextResponse.json(
-        { error: 'Group not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: 'Group not found' }, { status: 404 })
+    }
+
+    // Check if the user is a member of the group
+    const isMember = group.members.some(member => member.user.id === session.user.id)
+    if (!isMember) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
     const formattedGroup = {
       id: group.id,
       name: group.name,
       description: group.description,
+      isArchived: group.isArchived,
+      visibility: group.visibility,
+      maxMembers: group.maxMembers,
+      settings: group.settings,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt,
+      owner: {
+        id: group.owner.id,
+        name: group.owner.name || '',
+        email: group.owner.email,
+        avatar: group.owner.avatar || '',
+      },
       members: group.members.map((member) => ({
         id: member.user.id,
         name: member.user.name || '',
         email: member.user.email,
-  
+        avatar: member.user.avatar || '',
         role: member.role.toLowerCase(),
+        joinedAt: member.joinedAt,
+        permissions: member.permissions,
       })),
-    };
+    }
 
-    return NextResponse.json(formattedGroup);
+    return NextResponse.json(formattedGroup)
   } catch (error) {
-    console.error('Error fetching group:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('Error fetching group:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 

@@ -1,8 +1,7 @@
-import { authOptions } from "@/lib/auth/config"
-import prisma from "@/lib/db"
-import { createChannelSchema } from "@/lib/validations/channel"
-import { getServerSession } from "next-auth"
-import { NextRequest, NextResponse } from "next/server"
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth/config'
+import prisma from '@/lib/db'
 
 export async function GET(
   req: NextRequest,
@@ -14,45 +13,17 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'Group ID is required' },
-        { status: 400 }
-      )
-    }
-
-    const groupMember = await prisma.groupMember.findFirst({
-      where: {
-        groupId: id,
-        userId: session.user.id
-      }
-    })
-
-    if (!groupMember) {
-      return NextResponse.json(
-        { error: 'Group access denied' },
-        { status: 403 }
-      )
-    }
+    const groupId = params.id
 
     const channels = await prisma.channel.findMany({
-      where: {
-        groupId: id
-      },
-      orderBy: {
-        name: 'asc'
-      }
+      where: { groupId },
+      orderBy: { createdAt: 'asc' },
     })
 
     return NextResponse.json(channels)
   } catch (error) {
     console.error('Error fetching channels:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch channels' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -66,49 +37,34 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
-    const body = await req.json()
-    const validatedData = createChannelSchema.parse({ ...body, groupId: id })
+    const groupId = params.id
+    const { name, description, type } = await req.json()
 
+    // Check if the user is an admin of the group
     const groupMember = await prisma.groupMember.findFirst({
       where: {
-        groupId: id,
+        groupId,
         userId: session.user.id,
-        role: {
-          in: ['ADMIN', 'MODERATOR']
-        }
-      }
+        role: 'ADMIN',
+      },
     })
 
     if (!groupMember) {
-      return NextResponse.json(
-        { error: 'Insufficient permissions' },
-        { status: 403 }
-      )
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
     }
 
-    const channel = await prisma.channel.create({
-      data: validatedData
-    })
-
-    await prisma.activityLog.create({
+    const newChannel = await prisma.channel.create({
       data: {
-        userId: session.user.id,
-        action: 'CHANNEL_CREATED',
-        details: {
-          channelId: channel.id,
-          channelName: channel.name,
-          groupId: channel.groupId
-        }
-      }
+        name,
+        description,
+        type,
+        groupId,
+      },
     })
 
-    return NextResponse.json(channel, { status: 201 })
+    return NextResponse.json(newChannel, { status: 201 })
   } catch (error) {
     console.error('Error creating channel:', error)
-    return NextResponse.json(
-      { error: 'Failed to create channel' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

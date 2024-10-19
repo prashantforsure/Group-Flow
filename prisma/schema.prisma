@@ -252,7 +252,7 @@ model Channel {
   type        ChannelType @default(GENERAL)
   groupId     String
   createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  updatedAt   DateTime    @default(now()) @updatedAt 
   messages    Message[]
   group       Group       @relation(fields: [groupId], references: [id])
 }
