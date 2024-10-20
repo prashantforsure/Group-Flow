@@ -11,8 +11,6 @@
     "lint:fix": "eslint src/ --fix",
     "lint:types": "tsc --noEmit",
     "lint:all": "npm run lint:strict && npm run lint:types"
-  
-
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -33,6 +31,7 @@
     "@radix-ui/react-tabs": "^1.1.1",
     "@radix-ui/react-toast": "^1.2.2",
     "@types/bcrypt": "^5.0.2",
+    "@types/ws": "^8.5.12",
     "axios": "^1.7.7",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
@@ -54,6 +53,7 @@
     "recharts": "^2.13.0",
     "tailwind-merge": "^2.5.3",
     "tailwindcss-animate": "^1.0.7",
+    "ws": "^8.18.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
