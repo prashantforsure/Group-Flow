@@ -4,6 +4,7 @@
 import { SessionProvider } from 'next-auth/react'
 import { FC, ReactNode } from 'react'
 
+
 interface LayoutProps {
   children: ReactNode
 }
@@ -12,7 +13,9 @@ interface LayoutProps {
 const Providers: FC<LayoutProps> = ({ children }) => {
   return (
     
-      <SessionProvider>{children}</SessionProvider>
+      <SessionProvider>
+         {children}
+      </SessionProvider>
    
   )
 }
